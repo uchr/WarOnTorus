@@ -44,7 +44,9 @@ public class Grid {
 		grid = new bool[width, height];
 	}
 
-	public List<GridPoint> FindPath(GridPoint start, GridPoint goal) {
+	public void FindPath(object arg) {
+		GridPoint start = ((Arg) arg).start;
+		GridPoint goal = ((Arg) arg).goal;
 		var closedSet = new Collection<PathNode>();
 		var openSet = new Collection<PathNode>();
 
@@ -57,16 +59,20 @@ public class Grid {
 
 		openSet.Add(startNode);
 		while (openSet.Count > 0) {
+			if (((Arg) arg).suicide)
+				return;
 			var currentNode = openSet.OrderBy(node => node.estimateFullPathLength).First();
 			if(currentNode.position.x == goal.x && currentNode.position.y == goal.y) {
-				return GetPathForNode(currentNode);
+				((Arg) arg).path = GetPathForNode(currentNode);
+				return;
 			}
 			openSet.Remove(currentNode);
 			closedSet.Add(currentNode);
 			// HACK!
 			//Debug.Log(currentNode.pathLengthFromStart);
-			if (currentNode.pathLengthFromStart > 50)
-				return null;
+			if (currentNode.pathLengthFromStart > 50) {
+				return;
+			}
 			foreach (var neighbourNode in GetNeighbours(currentNode, goal)) {
 				if (closedSet.Count(node => (node.position.x == neighbourNode.position.x && node.position.y == neighbourNode.position.y)) > 0)
 					continue;
@@ -81,7 +87,7 @@ public class Grid {
 				}
 			}
 		}
-		return null;
+		return;
 	}
 
 	private int GetHeuristicPathLength(GridPoint start, GridPoint goal) {

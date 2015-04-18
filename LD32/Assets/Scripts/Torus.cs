@@ -3,9 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class Torus : MonoBehaviour {
-	private static Map _instance;
+	private static Torus _instance;
  
-    public static Map instance
+    public static Torus instance
     {
         get
         {

@@ -2,11 +2,20 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
+using System.Linq;
+
+public class Arg {
+	public GridPoint start;
+	public GridPoint goal;
+	public List<GridPoint> path;
+	public bool suicide;
+}
 
 public class Map : MonoBehaviour {
 	private class ThreadForUnit {
-		Thread thred;
-		Unit unit;
+		public Thread thred;
+		public Unit unit;
+		public Arg arg;
 	}
 
 	private static Map _instance;
@@ -77,26 +86,56 @@ public class Map : MonoBehaviour {
 	}
 
 	public void SetPath(Vector3 from, Vector3 to, Unit unit) {
-		GridPoint start = GetGridPoint(from);
-		GridPoint goal = GetGridPoint(to);
+		GridPoint s = GetGridPoint(from);
+		GridPoint g = GetGridPoint(to);
 
-		if (grid.grid[goal.x, goal.y])
-			return null;
-
-		var path = grid.FindPath(start, goal);
-		if (path == null)
-			return null;
-
-		List<Vector3> result = new List<Vector3>();
-		foreach (var point in path) {
-			var i = point.x;
-			var j = point.y;
-			result.Add(new Vector3((bigR + smallR * Mathf.Cos(smallTilings * j)) * Mathf.Cos(bigTilings * i), (bigR + smallR * Mathf.Cos(smallTilings * j)) * Mathf.Sin(bigTilings * i), smallR * Mathf.Sin(smallTilings * j)));
+		if (grid.grid[g.x, g.y]) {
+			unit.UpdatePath(null);
+			return;
 		}
-		return result.ToArray();
+
+		foreach (var thred in threds) {
+			if (thred.unit == unit)
+				thred.arg.suicide = true;
+			//threds.Remove(thred);
+		}
+
+		var t = new ThreadForUnit();
+		t.unit = unit;
+		t.arg = new Arg() {
+			start = s,
+			goal = g,
+			suicide = false,
+			path = null
+		};
+		t.thred = new Thread(new ParameterizedThreadStart(grid.FindPath));
+		t.thred.Start(t.arg);
+		threds.Add(t);
 	}
 
-	public 
+	public void CheckThred() {
+		//HACK!
+		List<ThreadForUnit> deads = new List<ThreadForUnit>(); 
+		foreach (var thred in threds) {
+			if (!thred.thred.IsAlive)
+				deads.Add(thred);
+		}
+		foreach (var thred in deads) {
+			if (thred.arg.path == null) {
+				thred.unit.UpdatePath(null);
+			}
+			else {
+				List<Vector3> result = new List<Vector3>();
+				foreach (var point in thred.arg.path) {
+					var i = point.x;
+					var j = point.y;
+					result.Add(new Vector3((bigR + smallR * Mathf.Cos(smallTilings * j)) * Mathf.Cos(bigTilings * i), (bigR + smallR * Mathf.Cos(smallTilings * j)) * Mathf.Sin(bigTilings * i), smallR * Mathf.Sin(smallTilings * j)));
+				}
+				thred.unit.UpdatePath(result.ToArray());
+			}
+			threds.Remove(thred);
+		}
+	}
 
 	private void Awake() {
 		width = torus.bigTilings * bigTilingsFactor;
@@ -107,13 +146,17 @@ public class Map : MonoBehaviour {
 
 		bigR = torus.bigR;
 		smallR = torus.smallR;
+
 		grid = new Grid(width, height);
+
 		CalculateGrid();
+
+		threds = new List<ThreadForUnit>();
 	}
 
 	private void Update() {
+		CheckThred();
 		if (grid != null) {
-
 			float phi = 0.0f, teta = 0.0f;
 			for (int i = 0; i < width; ++i) {
 				teta = 0.0f;

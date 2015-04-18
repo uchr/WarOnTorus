@@ -1,11 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class HorTank : Uniy {
+public class HorTank : Unit {
 	public float speed = 10.0f;
-
-	public Vector3[] path;
-	private int i = 0;
 
 	private Torus torus;
 
@@ -19,11 +16,6 @@ public class HorTank : Uniy {
 		cachedTransform.up = (cachedTransform.position - c).normalized;
 	}
 
-	public void UpdatePath(Vector3[] path) {
-		i = 1;
-		this.path = path;
-	}
-
 	private void Awake() {
 		torus = Torus.instance;
 		cachedTransform = GetComponent<Transform>();
@@ -34,7 +26,6 @@ public class HorTank : Uniy {
 		if (path != null && i < path.Length) {
 			cachedTransform.position = Vector3.Lerp(cachedTransform.position, path[i], Time.deltaTime * speed);
 			cachedTransform.up = torus.GetNormal(cachedTransform.position);
-			Debug.Log(i);
 			if (Vector3.Distance(cachedTransform.position, path[i]) < 1.0f && i + 1 < path.Length)
 				++i;
 		}
