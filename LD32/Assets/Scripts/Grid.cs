@@ -14,24 +14,24 @@ public class GridPoint {
 	}
 }
 
-public class PathNode {
-	// Координаты точки
-	public GridPoint position;
-	// Длина пути от старта - G
-	public int pathLengthFromStart;
-	// Узел от которо пришли
-	public PathNode cameFrom;
-	// Примерное расстояние до цели - H
-	public int heuristicEstimatePathLength;
-	// Ожидаемое расстояние до цели - F
-	public int estimateFullPathLength {
-		get {
-			return pathLengthFromStart + heuristicEstimatePathLength;
+public class Grid {
+	public class PathNode {
+		// Координаты точки
+		public GridPoint position;
+		// Длина пути от старта - G
+		public int pathLengthFromStart;
+		// Узел от которо пришли
+		public PathNode cameFrom;
+		// Примерное расстояние до цели - H
+		public int heuristicEstimatePathLength;
+		// Ожидаемое расстояние до цели - F
+		public int estimateFullPathLength {
+			get {
+				return pathLengthFromStart + heuristicEstimatePathLength;
+			}
 		}
 	}
-}
 
-public class Grid {
 	public int bigCoef;
 	public int smallCoef;
 
@@ -67,6 +67,10 @@ public class Grid {
 			}
 			openSet.Remove(currentNode);
 			closedSet.Add(currentNode);
+			// HACK!
+			//Debug.Log(currentNode.pathLengthFromStart);
+			if (currentNode.pathLengthFromStart > 50)
+				return null;
 			foreach (var neighbourNode in GetNeighbours(currentNode, goal)) {
 				if (closedSet.Count(node => (node.position.x == neighbourNode.position.x && node.position.y == neighbourNode.position.y)) > 0)
 					continue;
@@ -85,11 +89,24 @@ public class Grid {
 	}
 
 	private int GetHeuristicPathLength(GridPoint start, GridPoint goal) {
-		return (int) Mathf.Sqrt((start.x - goal.x) * (start.x - goal.x) + (start.y - goal.y) * (start.y - goal.y));
-	}
-
-	private int GetDistanceBetweenNeighbours() {
-		return 1;
+		float tMin;
+		int gluingX = goal.x, gluingY = goal.y;
+		float min = Mathf.Sqrt((start.x - goal.x) * (start.x - goal.x) + (start.y - goal.y) * (start.y - goal.y));
+		
+		// X gluing
+		gluingX = (start.x < (width / 2)) ? goal.x - width : goal.x + width;
+		tMin = Mathf.Sqrt((start.x - gluingX) * (start.x - gluingX) + (start.y - goal.y) * (start.y - goal.y));
+		min = tMin < min ? tMin : min;
+		
+		// Y gluing
+		gluingY = (start.y < (height / 2)) ? goal.y - height : goal.y + height;
+		tMin = Mathf.Sqrt((start.x - goal.x) * (start.x - goal.x) + (start.y - gluingY) * (start.y - gluingY));
+		min = tMin < min ? tMin : min;
+		
+		// XY gluing
+		tMin = Mathf.Sqrt((start.x - gluingX) * (start.x - gluingX) + (start.y - gluingY) * (start.y - gluingY));
+		min = tMin < min ? tMin : min;
+		return (int) min;
 	}
 
 	private Collection<PathNode> GetNeighbours(PathNode pathNode, GridPoint goal) {
@@ -106,16 +123,22 @@ public class Grid {
 		neighbourPoints[7] = new GridPoint(pathNode.position.x + 1, pathNode.position.y - 1);
 
 		foreach (var point in neighbourPoints) {
-			if (point.x < 0 || point.x >= width)
-				continue;
-			if (point.y < 0 || point.y >= height)
-				continue;
+			if (point.x < 0)
+				point.x = width - 1;
+			if (point.x >= width)
+				point.x = 0;
+
+			if (point.y < 0)
+				point.y = height - 1;
+			if (point.y >= height)
+				point.y = 0;
+
 			if (grid[point.x, point.y])
 				continue;
 			var neighbourNode = new PathNode() {
 				position = point,
 				cameFrom = pathNode,
-				pathLengthFromStart = pathNode.pathLengthFromStart + GetDistanceBetweenNeighbours(),
+				pathLengthFromStart = pathNode.pathLengthFromStart + 1,
 				heuristicEstimatePathLength = GetHeuristicPathLength(point, goal)
 			};
 			result.Add(neighbourNode);

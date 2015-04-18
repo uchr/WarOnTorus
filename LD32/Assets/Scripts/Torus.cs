@@ -13,7 +13,7 @@ public class Torus : MonoBehaviour {
 	private Grid grid;
 
 	public void CalculateGrid() {
-		grid = new Grid(bigSteps * 3, smallSteps * 3, 3, 3);
+		grid = new Grid(bigSteps * 3, smallSteps * 2, 3, 2);
 
 		float bigStep = 2.0f * Mathf.PI / (bigSteps * grid.bigCoef);
 		float smallStep = 2.0f * Mathf.PI / (smallSteps * grid.smallCoef);
@@ -46,16 +46,16 @@ public class Torus : MonoBehaviour {
 
 	//HACK!
 	public GridPoint GetGridPoint(Vector3 point) {
-		float eps = 0.5f;
-		float bigStep = 2.0f * Mathf.PI / (bigSteps * 3.0f);
-		float smallStep = 2.0f * Mathf.PI / (smallSteps * 3.0f);
+		float eps = 0.3f;
+		float bigStep = 2.0f * Mathf.PI / (bigSteps * grid.bigCoef);
+		float smallStep = 2.0f * Mathf.PI / (smallSteps * grid.smallCoef);
 		float phi = 0.0f, teta = 0.0f;
-		for (int i = 0; i < bigSteps * 3; ++i) {
+		for (int i = 0; i < bigSteps * grid.bigCoef; ++i) {
 			teta = 0.0f;
-			for(int j = 0; j < smallSteps * 3; ++j) {
+			for(int j = 0; j < smallSteps * grid.smallCoef; ++j) {
 				Vector3 p = new Vector3((bigR + smallR * Mathf.Cos(teta)) * Mathf.Cos(phi), (bigR + smallR * Mathf.Cos(teta)) * Mathf.Sin(phi), smallR * Mathf.Sin(teta));
-				if ((p - point).magnitude < eps) 
-					return new GridPoint(i + 1, j + 1);
+				if (Vector3.Distance(p, point) < eps) 
+					return new GridPoint(i, j);
 				teta += smallStep;
 			}
 			phi += bigStep;
@@ -64,9 +64,15 @@ public class Torus : MonoBehaviour {
 		return new GridPoint(0, 0);
 	}
 
-
 	public Vector3[] GetPath(Vector3 from, Vector3 to) {
+		GridPoint start = GetGridPoint(from);
+		GridPoint goal = GetGridPoint(to);
+		Debug.Log(goal.x + " " + goal.y);
+		if (grid.grid[goal.x, goal.y])
+			return null;
 		var path = grid.FindPath(GetGridPoint(from), GetGridPoint(to));
+		if (path == null)
+			return null;
 		List<Vector3> result = new List<Vector3>();
 		foreach (var point in path) {
 			float bigStep = 2.0f * Mathf.PI / (bigSteps * grid.bigCoef);
@@ -134,7 +140,7 @@ public class Torus : MonoBehaviour {
 			float phi = 0.0f, teta = 0.0f;
 			for (int i = 0; i < grid.width; ++i) {
 				teta = 0.0f;
-				Vector3 c = new Vector3(bigR * Mathf.Cos(phi), bigR * Mathf.Sin(phi), 0.0f);
+				//Vector3 c = new Vector3(bigR * Mathf.Cos(phi), bigR * Mathf.Sin(phi), 0.0f);
 				for(int j = 0; j < grid.height; ++j) {
 					Vector3 p1 = new Vector3((bigR + smallR * Mathf.Cos(teta)) * Mathf.Cos(phi), (bigR + smallR * Mathf.Cos(teta)) * Mathf.Sin(phi), smallR * Mathf.Sin(teta));
 					Vector3 p2 = new Vector3((bigR + smallR * Mathf.Cos(teta) * 2.0f) * Mathf.Cos(phi), (bigR + smallR * Mathf.Cos(teta) * 2.0f) * Mathf.Sin(phi), smallR * Mathf.Sin(teta) * 2.0f);

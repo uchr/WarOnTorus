@@ -36,6 +36,7 @@ public class UserControls : MonoBehaviour {
 				pointer.up = torus.GetNormal(hit.point);
 			}
 			if (Input.GetMouseButtonUp(0)) {
+				currentBuilder = null;
 				Debug.Log(torus.GetGridPoint(pointer.position).x + " " + torus.GetGridPoint(pointer.position).y);
 			}
 
