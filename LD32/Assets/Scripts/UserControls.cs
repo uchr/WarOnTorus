@@ -4,6 +4,8 @@ using System.Collections;
 public class UserControls : MonoBehaviour {
 	public Torus torus;
 
+	public Man man;
+
 	public Transform pointer;
 	public GameObject building;
 
@@ -14,6 +16,7 @@ public class UserControls : MonoBehaviour {
 		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 		if (Physics.Raycast(ray, out hit, 50.0f, 1 << 8)) {
 			pointer.position = hit.point;
+
 			// Right Button
 			if (Input.GetMouseButtonDown(0)) {
 				currentBuilder = (GameObject) Instantiate(building, pointer.position, pointer.rotation);
@@ -34,6 +37,11 @@ public class UserControls : MonoBehaviour {
 			}
 			if (Input.GetMouseButtonUp(0)) {
 				Debug.Log(torus.GetGridPoint(pointer.position).x + " " + torus.GetGridPoint(pointer.position).y);
+			}
+
+			//Left button
+			if (Input.GetMouseButtonUp(1)) {
+				man.path = torus.GetPath(man.transform.position, pointer.position);
 			}
 		} else {
 			if (Input.GetMouseButtonUp(0)) {

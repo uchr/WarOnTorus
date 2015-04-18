@@ -19,9 +19,6 @@ public class CameraMovement : MonoBehaviour {
 
 	private void Awake() {
 		cachedTransform = GetComponent<Transform>();
-	}
-
-	private void Start() {
 		UpdatePosition();
 	}
 

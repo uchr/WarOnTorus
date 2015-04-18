@@ -65,12 +65,19 @@ public class Torus : MonoBehaviour {
 	}
 
 
-	public GridPoint[] GetPath(Vector3 from, Vector3 to) {
-		GridPoint s = GetGridPoint(from), e = GetGridPoint(to);
-
-		var r = new GridPoint[1];
-		return r;
+	public Vector3[] GetPath(Vector3 from, Vector3 to) {
+		var path = grid.FindPath(GetGridPoint(from), GetGridPoint(to));
+		List<Vector3> result = new List<Vector3>();
+		foreach (var point in path) {
+			float bigStep = 2.0f * Mathf.PI / (bigSteps * grid.bigCoef);
+			float smallStep = 2.0f * Mathf.PI / (smallSteps * grid.smallCoef);
+			var i = point.x;
+			var j = point.y;
+			result.Add(new Vector3((bigR + smallR * Mathf.Cos(smallStep * j)) * Mathf.Cos(bigStep * i), (bigR + smallR * Mathf.Cos(smallStep * j)) * Mathf.Sin(bigStep * i), smallR * Mathf.Sin(smallStep * j)));
+		}
+		return result.ToArray();
 	}
+
 	private void Awake() {
 		List<Vector3> vertices = new List<Vector3>();
 		List<Vector3> normals = new List<Vector3>();
