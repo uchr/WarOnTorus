@@ -32,19 +32,15 @@ public class Grid {
 		}
 	}
 
-	public int bigCoef;
-	public int smallCoef;
-
 	public int width;
 	public int height;
 
 	public bool[,] grid;
 
-	public Grid(int width, int height, int bigCoef, int smallCoef) {
+	public Grid(int width, int height) {
 		this.width = width;
 		this.height = height;
-		this.bigCoef = bigCoef;
-		this.smallCoef = smallCoef;
+
 		grid = new bool[width, height];
 	}
 

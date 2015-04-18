@@ -1,10 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Man : MonoBehaviour {
-	public Torus torus;
+public class HorTank : Uniy {
+	public float speed = 10.0f;
 
 	public Vector3[] path;
+	private int i = 0;
+
+	private Torus torus;
 
 	private float phi = 0.0f;
 	private float teta = 0.0f;
@@ -16,12 +19,25 @@ public class Man : MonoBehaviour {
 		cachedTransform.up = (cachedTransform.position - c).normalized;
 	}
 
+	public void UpdatePath(Vector3[] path) {
+		i = 1;
+		this.path = path;
+	}
+
 	private void Awake() {
+		torus = Torus.instance;
 		cachedTransform = GetComponent<Transform>();
 		UpdatePosition();
 	}
 
 	private void Update() {
+		if (path != null && i < path.Length) {
+			cachedTransform.position = Vector3.Lerp(cachedTransform.position, path[i], Time.deltaTime * speed);
+			cachedTransform.up = torus.GetNormal(cachedTransform.position);
+			Debug.Log(i);
+			if (Vector3.Distance(cachedTransform.position, path[i]) < 1.0f && i + 1 < path.Length)
+				++i;
+		}
 	}
 
 	private void OnDrawGizmos() {

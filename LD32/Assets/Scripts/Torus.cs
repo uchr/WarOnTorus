@@ -3,37 +3,23 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class Torus : MonoBehaviour {
+	private static Map _instance;
+ 
+    public static Map instance
+    {
+        get
+        {
+            if(_instance == null)
+                _instance = GameObject.FindObjectOfType<Torus>();
+            return _instance;
+        }
+    }
+
 	public float bigR = 10.0f;
 	public float smallR = 4.0f;
-	public int bigSteps = 50;
-	public int smallSteps = 40;
-
-	public LayerMask layerMask;
-
-	private Grid grid;
-
-	public void CalculateGrid() {
-		grid = new Grid(bigSteps * 3, smallSteps * 2, 3, 2);
-
-		float bigStep = 2.0f * Mathf.PI / (bigSteps * grid.bigCoef);
-		float smallStep = 2.0f * Mathf.PI / (smallSteps * grid.smallCoef);
-		float phi = 0.0f, teta = 0.0f;
-		for (int i = 0; i < grid.width; ++i) {
-			teta = 0.0f;
-			Vector3 c = new Vector3(bigR * Mathf.Cos(phi), bigR * Mathf.Sin(phi), 0.0f);
-			for(int j = 0; j < grid.height; ++j) {
-				Vector3 p = new Vector3((bigR + smallR * Mathf.Cos(teta)) * Mathf.Cos(phi), (bigR + smallR * Mathf.Cos(teta)) * Mathf.Sin(phi), smallR * Mathf.Sin(teta));
-				if(Physics.Raycast(c, p - c, smallR * 2.0f, layerMask.value)) {
-					grid.grid[i,j] = true;
-				}
-				else {
-					grid.grid[i,j] = false;
-				}
-				teta += smallStep;
-			}
-			phi += bigStep;
-		}
-	}
+	
+	public int bigTilings = 50;
+	public int smallTilings = 40;
 
 	public Vector3 GetNormal(Vector3 point) {
 		float phi = GetPhi(point);
@@ -44,46 +30,6 @@ public class Torus : MonoBehaviour {
 		return Mathf.Atan2(point.y, point.x);
 	}
 
-	//HACK!
-	public GridPoint GetGridPoint(Vector3 point) {
-		float eps = 0.3f;
-		float bigStep = 2.0f * Mathf.PI / (bigSteps * grid.bigCoef);
-		float smallStep = 2.0f * Mathf.PI / (smallSteps * grid.smallCoef);
-		float phi = 0.0f, teta = 0.0f;
-		for (int i = 0; i < bigSteps * grid.bigCoef; ++i) {
-			teta = 0.0f;
-			for(int j = 0; j < smallSteps * grid.smallCoef; ++j) {
-				Vector3 p = new Vector3((bigR + smallR * Mathf.Cos(teta)) * Mathf.Cos(phi), (bigR + smallR * Mathf.Cos(teta)) * Mathf.Sin(phi), smallR * Mathf.Sin(teta));
-				if (Vector3.Distance(p, point) < eps) 
-					return new GridPoint(i, j);
-				teta += smallStep;
-			}
-			phi += bigStep;
-		}
-
-		return new GridPoint(0, 0);
-	}
-
-	public Vector3[] GetPath(Vector3 from, Vector3 to) {
-		GridPoint start = GetGridPoint(from);
-		GridPoint goal = GetGridPoint(to);
-		Debug.Log(goal.x + " " + goal.y);
-		if (grid.grid[goal.x, goal.y])
-			return null;
-		var path = grid.FindPath(GetGridPoint(from), GetGridPoint(to));
-		if (path == null)
-			return null;
-		List<Vector3> result = new List<Vector3>();
-		foreach (var point in path) {
-			float bigStep = 2.0f * Mathf.PI / (bigSteps * grid.bigCoef);
-			float smallStep = 2.0f * Mathf.PI / (smallSteps * grid.smallCoef);
-			var i = point.x;
-			var j = point.y;
-			result.Add(new Vector3((bigR + smallR * Mathf.Cos(smallStep * j)) * Mathf.Cos(bigStep * i), (bigR + smallR * Mathf.Cos(smallStep * j)) * Mathf.Sin(bigStep * i), smallR * Mathf.Sin(smallStep * j)));
-		}
-		return result.ToArray();
-	}
-
 	private void Awake() {
 		List<Vector3> vertices = new List<Vector3>();
 		List<Vector3> normals = new List<Vector3>();
@@ -91,31 +37,31 @@ public class Torus : MonoBehaviour {
 		List<int> triangles = new List<int>();
 
 		//Повторяющиейся вершины в 2*PI для uv
-		float bigStep = 2 * Mathf.PI / bigSteps;
-		float smallStep = 2 * Mathf.PI / smallSteps;
+		float bigStep = 2 * Mathf.PI / bigTilings;
+		float smallStep = 2 * Mathf.PI / smallTilings;
 		float phi = 0.0f, teta = 0.0f;
-		for (int i = 0; i <= bigSteps; ++i) {
+		for (int i = 0; i <= bigTilings; ++i) {
 			teta = 0.0f;
 			Vector3 c = new Vector3(bigR * Mathf.Cos(phi), bigR * Mathf.Sin(phi), 0.0f);
-			for(int j = 0; j <= smallSteps; ++j) {
+			for(int j = 0; j <= smallTilings; ++j) {
 				Vector3 p = new Vector3((bigR + smallR * Mathf.Cos(teta)) * Mathf.Cos(phi), (bigR + smallR * Mathf.Cos(teta)) * Mathf.Sin(phi), smallR * Mathf.Sin(teta));
 				vertices.Add(p);
 				normals.Add(p - c);
-				uv.Add(new Vector2((float) i / (bigSteps), (float) j / (smallSteps)));
+				uv.Add(new Vector2((float) i / (bigTilings), (float) j / (smallTilings)));
 				teta += smallStep;
 			}
 			phi += bigStep;
 		}
 
-		for (int i = 0; i < bigSteps; ++i) {
-			for(int j = 0; j < smallSteps; ++j) {
-				triangles.Add(j + (smallSteps + 1) * i);
-				triangles.Add(j + (smallSteps + 1) * (i + 1));
-				triangles.Add((j + 1) + (smallSteps + 1) * i);
+		for (int i = 0; i < bigTilings; ++i) {
+			for(int j = 0; j < smallTilings; ++j) {
+				triangles.Add(j + (smallTilings + 1) * i);
+				triangles.Add(j + (smallTilings + 1) * (i + 1));
+				triangles.Add((j + 1) + (smallTilings + 1) * i);
 
-				triangles.Add(j + (smallSteps + 1) * (i + 1));
-				triangles.Add((j + 1) + (smallSteps + 1) * (i + 1));
-				triangles.Add((j + 1) + (smallSteps + 1) * i);
+				triangles.Add(j + (smallTilings + 1) * (i + 1));
+				triangles.Add((j + 1) + (smallTilings + 1) * (i + 1));
+				triangles.Add((j + 1) + (smallTilings + 1) * i);
 			}
 		}
 
@@ -129,28 +75,5 @@ public class Torus : MonoBehaviour {
 		var meshCollider = gameObject.GetComponent<MeshCollider>();
 		meshFilter.sharedMesh = mesh;
 		meshCollider.sharedMesh = mesh;
-	}
-	
-	private void OnDrawGizmos() {
-		if (gameObject.GetComponent<MeshFilter>().sharedMesh != null && grid != null) {
-			Gizmos.color = Color.red;
-
-			float bigStep = 2.0f * Mathf.PI / (bigSteps * grid.bigCoef);
-			float smallStep = 2.0f * Mathf.PI / (smallSteps * grid.smallCoef);
-			float phi = 0.0f, teta = 0.0f;
-			for (int i = 0; i < grid.width; ++i) {
-				teta = 0.0f;
-				//Vector3 c = new Vector3(bigR * Mathf.Cos(phi), bigR * Mathf.Sin(phi), 0.0f);
-				for(int j = 0; j < grid.height; ++j) {
-					Vector3 p1 = new Vector3((bigR + smallR * Mathf.Cos(teta)) * Mathf.Cos(phi), (bigR + smallR * Mathf.Cos(teta)) * Mathf.Sin(phi), smallR * Mathf.Sin(teta));
-					Vector3 p2 = new Vector3((bigR + smallR * Mathf.Cos(teta) * 2.0f) * Mathf.Cos(phi), (bigR + smallR * Mathf.Cos(teta) * 2.0f) * Mathf.Sin(phi), smallR * Mathf.Sin(teta) * 2.0f);
-					if(grid.grid[i,j]) {
-						Gizmos.DrawLine(p1, p2);
-					}
-					teta += smallStep;
-				}
-				phi += bigStep;
-			}
-		}
 	}
 }

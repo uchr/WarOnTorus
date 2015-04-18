@@ -4,7 +4,7 @@ using System.Collections;
 public class UserControls : MonoBehaviour {
 	public Torus torus;
 
-	public Man man;
+	public HorTank horTank;
 
 	public Transform pointer;
 	public GameObject building;
@@ -25,24 +25,16 @@ public class UserControls : MonoBehaviour {
 				currentBuilder.transform.position = pointer.position;
 				currentBuilder.transform.rotation = pointer.rotation;
 
-				var gridPoint = torus.GetGridPoint(pointer.position);
-				float bigStep = 2.0f * Mathf.PI / (torus.bigSteps * 3.0f);
-				float smallStep = 2.0f * Mathf.PI / (torus.smallSteps * 3.0f);
-				var i = gridPoint.x;
-				var j = gridPoint.y;
-				var c = new Vector3(torus.bigR * Mathf.Cos(bigStep * i), torus.bigR * Mathf.Sin(bigStep * i), 0.0f);
-				var p = new Vector3((torus.bigR + torus.smallR * Mathf.Cos(smallStep * j)) * Mathf.Cos(bigStep * i), (torus.bigR + torus.smallR * Mathf.Cos(smallStep * j)) * Mathf.Sin(bigStep * i), torus.smallR * Mathf.Sin(smallStep * j));
-				Debug.DrawLine(c, c + 2.0f * (p - c), Color.green);
 				pointer.up = torus.GetNormal(hit.point);
 			}
 			if (Input.GetMouseButtonUp(0)) {
+				Map.instance.CalculateGrid();
 				currentBuilder = null;
-				Debug.Log(torus.GetGridPoint(pointer.position).x + " " + torus.GetGridPoint(pointer.position).y);
 			}
 
 			//Left button
 			if (Input.GetMouseButtonUp(1)) {
-				man.path = torus.GetPath(man.transform.position, pointer.position);
+				Map.instance.SetPath(horTank.transform.position, pointer.position, horTank);
 			}
 		} else {
 			if (Input.GetMouseButtonUp(0)) {
