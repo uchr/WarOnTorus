@@ -86,10 +86,18 @@ public class Map : MonoBehaviour {
 	}
 
 	public void SetPath(Vector3 to, Unit unit) {
+		if (unit == null)
+			return;
+
 		GridPoint s = GetGridPoint(unit.transform.position);
 		GridPoint g = GetGridPoint(to);
 
-		if (grid.grid[g.x, g.y]) {
+		if (grid == null) {
+			unit.UpdatePath(null);
+			return;
+		}
+
+		if (grid.grid == null || grid.grid[g.x, g.y]) {
 			unit.UpdatePath(null);
 			return;
 		}

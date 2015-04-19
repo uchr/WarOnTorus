@@ -38,6 +38,11 @@ public class CreatingObjects : MonoBehaviour {
 		factory.Production(id);
 	}
 
+	public void DestroyBuilding() {
+		if (factory != null)
+			Destroy(factory.gameObject);
+	}
+
 	private void Awake() {
 		bs = BalanceSettings.instance;
 	}

@@ -2,6 +2,7 @@
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Collections;
+using System.Collections.Generic;
 
 public class UserControls : MonoBehaviour {
 	public enum Mode {
@@ -14,14 +15,20 @@ public class UserControls : MonoBehaviour {
 	public Torus torus;
 	public Transform tangentSpace;
 
-	//public HorTank horTank;
-
 	public Transform pointer;
 
 	public GameObject factoryMenu;
 	public GameObject unitsMenu;
 
+	public bool field = false;
+	public GameObject fieldSelection;
+	public RectTransform transformField;
+	private Vector3 selectFrom;
+	private Vector3 selectTo;
+
 	public Mode mode = Mode.Default;
+
+	public LayerMask layerMask;
 
 	private CreatingObjects creatingObjects;
 	private UnitsController unitsController;
@@ -70,13 +77,30 @@ public class UserControls : MonoBehaviour {
 	}
 
 	private void Select() {
+		//Field
+		if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject()) {
+			field = true;
+			selectFrom = Input.mousePosition;
+		}
+
+		if (Input.GetMouseButton(0) && selectFrom != Vector3.zero) {
+			selectTo = Input.mousePosition;
+		}
+
+		if (Input.GetMouseButtonUp(0)) {
+			unitsController.SelectUnits(selectFrom, selectTo);
+			if (unitsController.units != null)
+			mode = Mode.SelectedUnits;
+			field = false;
+		}
+
 		if(!EventSystem.current.IsPointerOverGameObject()) {
 			RaycastHit hit;
 			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 			if (Input.GetMouseButtonUp(0)) {
 				DeselectAll();
 				// For build
-				if (Physics.Raycast(ray, out hit, 50.0f, 1 << 10)) {
+				if (Physics.Raycast(ray, out hit, 100.0f, 1 << 10)) {
 					var bulding = hit.transform.GetComponent<Factory>();
 					if(bulding != null) {
 						creatingObjects.factory = bulding;
@@ -84,8 +108,9 @@ public class UserControls : MonoBehaviour {
 					}
 				}
 				// For unit
-				if (Physics.Raycast(ray, out hit, 50.0f, 1 << 11)) {
-					unitsController.unit = hit.transform.GetComponent<Unit>();
+				if (Physics.Raycast(ray, out hit, 50.0f, 1 << 11) && unitsController.units == null) {
+					unitsController.units = new List<Unit>();
+					unitsController.units.Add(hit.transform.GetComponent<Unit>());
 					mode = Mode.SelectedUnits;
 				}
 			}
@@ -97,10 +122,26 @@ public class UserControls : MonoBehaviour {
 			factoryMenu.SetActive(true);
 		else 
 			factoryMenu.SetActive(false);
-		if (unitsController.unit != null)
+
+		if (unitsController.units != null)
 			unitsMenu.SetActive(true);
 		else
 			unitsMenu.SetActive(false);
+
+		if (field && Vector3.Distance(selectFrom, selectTo) > 20.0f) {
+			fieldSelection.SetActive(true);
+			var min = new Vector2(Mathf.Min(selectFrom.x, selectTo.x), Mathf.Min(selectFrom.y, selectTo.y));
+			var max = new Vector2(Mathf.Max(selectFrom.x, selectTo.x), Mathf.Max(selectFrom.y, selectTo.y));
+			min.x -= Screen.width / 2;
+			max.x -= Screen.width / 2;
+			min.y -= Screen.height / 2;
+			max.y -= Screen.height / 2;
+			transformField.offsetMin = min;
+			transformField.offsetMax = max;
+		}
+		else {
+			fieldSelection.SetActive(false);
+		}
 	}
 
 	public void SetMode(int mode) {
@@ -109,7 +150,7 @@ public class UserControls : MonoBehaviour {
 
 	public void DeselectAll() {
 		mode = Mode.Default;
-		unitsController.unit = null;
+		unitsController.units = null;
 		creatingObjects.factory = null;
 	}
 
@@ -124,27 +165,32 @@ public class UserControls : MonoBehaviour {
 		}
 		if (mode == Mode.SelectedBuilding) {
 			if (!EventSystem.current.IsPointerOverGameObject()) {
-				if (Input.GetMouseButtonUp(0) || Input.GetMouseButtonUp(1))
+				if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1))
 					DeselectAll();
 			}
 		}
+		RaycastHit hit;
+		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 		if (mode == Mode.SelectedUnits) {
 			if (!EventSystem.current.IsPointerOverGameObject()) {
-				if (Input.GetMouseButtonUp(0))
+				if (Input.GetMouseButtonDown(0))
 					DeselectAll();
-				if (Input.GetMouseButtonUp(1) && unitsController.unit != null) {
-					Map.instance.SetPath(pointer.position, unitsController.unit);
+				if (Input.GetMouseButtonDown(1) && unitsController.units != null && Physics.Raycast(ray, out hit, 50.0f, 1 << 8)) {
+					foreach (var unit in unitsController.units) {
+						Map.instance.SetPath(pointer.position, unit);
+					}
 				}
 			}
 		}
 		if (mode == Mode.Default) {
 			Select();
 		}
+
 		
 		SetupGUI();
 
-		RaycastHit hit;
-		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+		if (!EventSystem.current.IsPointerOverGameObject() && Input.GetMouseButtonDown(0) && !Physics.Raycast(ray, 50.0f, layerMask.value))
+			DeselectAll();
 		if (mode != Mode.ConstructBuilding && Physics.Raycast(ray, out hit, 50.0f, 1 << 8)) {
 			pointer.position = hit.point;
 			pointer.up = torus.GetNormal(hit.point);

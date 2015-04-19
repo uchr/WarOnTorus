@@ -106,8 +106,8 @@ public class Grid {
 		min = tMin < min ? tMin : min;
 		
 		// XY gluing
-		tMin = Mathf.Sqrt((start.x - gluingX) * (start.x - gluingX) + (start.y - gluingY) * (start.y - gluingY));
-		min = tMin < min ? tMin : min;
+		//tMin = Mathf.Sqrt((start.x - gluingX) * (start.x - gluingX) + (start.y - gluingY) * (start.y - gluingY));
+		//min = tMin < min ? tMin : min;
 		return (int) Mathf.Round(min);
 	}
 
@@ -137,6 +137,7 @@ public class Grid {
 
 			if (grid[point.x, point.y])
 				continue;
+
 			var neighbourNode = new PathNode() {
 				position = point,
 				cameFrom = pathNode,

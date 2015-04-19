@@ -10,4 +10,15 @@ public class Unit : MonoBehaviour {
 		i = 1;
 		this.path = path;
 	}
+
+	private void OnDrawGizmos() {
+		if (path != null) {
+			Gizmos.color = Color.green;
+			Vector3 prev = transform.position;
+			foreach (var point in path) {
+				Gizmos.DrawLine(prev, point);
+				prev = point;
+			}
+		}
+	}
 }
