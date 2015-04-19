@@ -98,7 +98,6 @@ public class UserControls : MonoBehaviour {
 			RaycastHit hit;
 			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 			if (Input.GetMouseButtonUp(0)) {
-				DeselectAll();
 				// For build
 				if (Physics.Raycast(ray, out hit, 100.0f, 1 << 10)) {
 					var bulding = hit.transform.GetComponent<Factory>();
@@ -157,6 +156,7 @@ public class UserControls : MonoBehaviour {
 	private void Awake() {
 		creatingObjects = CreatingObjects.instance;
 		unitsController = UnitsController.instance;
+		DeselectAll();
 	}
 
 	private void Update() {
@@ -176,6 +176,7 @@ public class UserControls : MonoBehaviour {
 				if (Input.GetMouseButtonDown(0))
 					DeselectAll();
 				if (Input.GetMouseButtonDown(1) && unitsController.units != null && Physics.Raycast(ray, out hit, 50.0f, 1 << 8)) {
+					Debug.Log(unitsController.units.Count);
 					foreach (var unit in unitsController.units) {
 						Map.instance.SetPath(pointer.position, unit);
 					}
@@ -188,9 +189,6 @@ public class UserControls : MonoBehaviour {
 
 		
 		SetupGUI();
-
-		if (!EventSystem.current.IsPointerOverGameObject() && Input.GetMouseButtonDown(0) && !Physics.Raycast(ray, 50.0f, layerMask.value))
-			DeselectAll();
 		if (mode != Mode.ConstructBuilding && Physics.Raycast(ray, out hit, 50.0f, 1 << 8)) {
 			pointer.position = hit.point;
 			pointer.up = torus.GetNormal(hit.point);

@@ -26,7 +26,7 @@ public class UnitsController : MonoBehaviour {
 		List<Unit> inField = new List<Unit>();
 		foreach (var unit in allUnits) {
 			var p = Camera.main.WorldToScreenPoint(unit.transform.position);
-			if (rect.Contains(new Vector2(p.x, p.y)) && !Physics.Raycast(unit.transform.position, Camera.main.transform.position - unit.transform.position, 100.0f, 1 << 8))
+			if (rect.Contains(new Vector2(p.x, p.y)) && !Physics.Raycast(unit.transform.position, Camera.main.transform.position - unit.transform.position, 50.0f, 1 << 8))
 				inField.Add(unit.GetComponent<Unit>());
 		}
 		if (inField.Count > 0) {
@@ -37,5 +37,7 @@ public class UnitsController : MonoBehaviour {
 		else {
 			units = null;
 		}
+		if (units != null)
+			Debug.Log("Selected: " + units.Count);
 	}
 }
