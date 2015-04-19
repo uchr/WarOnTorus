@@ -28,7 +28,16 @@ public class BalanceSettings : MonoBehaviour {
         }
     }
 
-    public int maxUnits = 10;
+    public float pushForce = 10.0f;
+
+    public int maxMinerals = 5;
+    public int saturationMinerals = 2000;
+    public int mineralsInTime = 10;
+    public float periodProductionMinerals = 10;
+
+    public int maxUnits = 20;
+
+    public GameObject minerals;
 
     public UnitSettigns[] units;
     public BuildingSettings[] buildings;

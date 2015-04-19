@@ -23,24 +23,32 @@ public class CameraMovement : MonoBehaviour {
 	}
 
 	private void Update() {
-		if (Input.GetKey(KeyCode.UpArrow)) {
+		if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W)) {
 			phi += step;
 			phi %= Mathf.PI * 2.0f;
 			UpdatePosition();
 		}
-		if (Input.GetKey(KeyCode.DownArrow)) {
+		if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S)) {
 			phi -= step;
 			phi %= Mathf.PI * 2.0f;
 			UpdatePosition();
 		}
-		if (Input.GetKey(KeyCode.RightArrow)) {
+		if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D)) {
 			teta += step;
 			teta %= Mathf.PI * 2.0f;
 			UpdatePosition();
 		}
-		if (Input.GetKey(KeyCode.LeftArrow)) {
+		if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A)) {
 			teta -= step;
 			teta %= Mathf.PI * 2.0f;
+			UpdatePosition();
+		}
+		if (Input.GetAxis("Mouse ScrollWheel") > 0) {
+			smallR -= step * 3.0f;
+			UpdatePosition();
+		}
+		if (Input.GetAxis("Mouse ScrollWheel") < 0) {
+			smallR += step * 3.0f;
 			UpdatePosition();
 		}
 	}

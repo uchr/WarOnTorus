@@ -69,8 +69,7 @@ public class Grid {
 			openSet.Remove(currentNode);
 			closedSet.Add(currentNode);
 			// HACK!
-			//Debug.Log(currentNode.pathLengthFromStart);
-			if (currentNode.pathLengthFromStart > 50) {
+			if (currentNode.pathLengthFromStart > 60) {
 				return;
 			}
 			foreach (var neighbourNode in GetNeighbours(currentNode, goal)) {
@@ -106,8 +105,8 @@ public class Grid {
 		min = tMin < min ? tMin : min;
 		
 		// XY gluing
-		//tMin = Mathf.Sqrt((start.x - gluingX) * (start.x - gluingX) + (start.y - gluingY) * (start.y - gluingY));
-		//min = tMin < min ? tMin : min;
+		tMin = Mathf.Sqrt((start.x - gluingX) * (start.x - gluingX) + (start.y - gluingY) * (start.y - gluingY));
+		min = tMin < min ? tMin : min;
 		return (int) Mathf.Round(min);
 	}
 

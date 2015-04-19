@@ -21,9 +21,19 @@ public class Torus : MonoBehaviour {
 	public int bigTilings = 50;
 	public int smallTilings = 40;
 
+	public Vector3 GetCortPoint(Vector3 point, float height = 0.0f) {
+		return new Vector3((bigR + (height + smallR) * Mathf.Cos(point.y)) * Mathf.Cos(point.x), (bigR + (height + smallR) * Mathf.Cos(point.y)) * Mathf.Sin(point.x), (height + smallR) * Mathf.Sin(point.y));
+	}
+
 	public Vector3 GetNormal(Vector3 point) {
 		float phi = GetPhi(point);
 		return (point - new Vector3(bigR * Mathf.Cos(phi), bigR * Mathf.Sin(phi), 0.0f)).normalized;
+	}
+
+	public Vector3 GetNormalFromT(Vector3 tPoint) {
+		var p = GetCortPoint(tPoint);
+		var c =  new Vector3(bigR * Mathf.Cos(tPoint.x), bigR * Mathf.Sin(tPoint.x), 0.0f);
+		return (p - c).normalized;
 	}
 
 	private float GetPhi(Vector3 point) {

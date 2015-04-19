@@ -2,12 +2,14 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class Factory : MonoBehaviour {
+public class Factory : Building {
 	private BalanceSettings bs;
 	private class UnitProduction {
 		public float time;
 		public int unitID;
 	}
+
+	private Vector3 spawnPoint;
 
 	private Transform cachedTransform;
 	private Queue<UnitProduction> queue;
@@ -30,8 +32,9 @@ public class Factory : MonoBehaviour {
 			var unitProduction = queue.Peek();
 			unitProduction.time -= Time.deltaTime;
 			if (unitProduction.time <= 0.0f) {
-				var unit = ((GameObject) Instantiate(bs.units[unitProduction.unitID].prefab, cachedTransform.position + cachedTransform.forward * 1.0f, Quaternion.identity)).transform;
-				unit.up = Torus.instance.GetNormal(unit.position);
+				var unit = ((GameObject) Instantiate(bs.units[unitProduction.unitID].prefab, Vector3.zero, Quaternion.identity)).GetComponent<Unit>();
+				unit.tPosition = tForward;
+				unit.UpdatePosition(cachedTransform.position + cachedTransform.forward * 0.5f);
 				queue.Dequeue();
 			}
 		}

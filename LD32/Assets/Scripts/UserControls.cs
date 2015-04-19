@@ -39,6 +39,19 @@ public class UserControls : MonoBehaviour {
 			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 			if (Physics.Raycast(ray, out hit, 50.0f, 1 << 8)) {
 				if (!creatingObjects.rotate) {
+					RaycastHit hitMinerals;
+					if (creatingObjects.checkMinerals && !Physics.Raycast(ray, out hitMinerals, 50.0f, 1 << 14)) {
+						creatingObjects.building.transform.position = Vector3.down * 100.0f;
+						return;
+					}
+					if (creatingObjects.checkMinerals && Physics.Raycast(hitMinerals.point, (Camera.main.transform.position - hitMinerals.point).normalized, Vector3.Distance(Camera.main.transform.position,hitMinerals.point) / 2.0f, 1 << 8)) {
+						creatingObjects.building.transform.position = Vector3.down * 100.0f;
+						return;
+					}
+					if (Physics.Raycast(ray, 50.0f, 1 << 15)) {
+						creatingObjects.building.transform.position = Vector3.down * 100.0f;
+						return;
+					}
 					creatingObjects.building.position = hit.point;
 					creatingObjects.building.up = torus.GetNormal(hit.point);
 				}
@@ -59,6 +72,13 @@ public class UserControls : MonoBehaviour {
 				}
 				if (Input.GetMouseButtonUp(0)) {
 					creatingObjects.construct = false;
+					if (creatingObjects.building != null) {
+						var sphereColliders = creatingObjects.building.GetComponentsInChildren<SphereCollider>();
+						foreach (var sc in sphereColliders) {
+							sc.enabled = true;
+						}
+						creatingObjects.building.GetComponent<Building>().CortToTState();
+					}
 					creatingObjects.building = null;
 					Map.instance.CalculateGrid();
 					mode = Mode.Default;
@@ -104,6 +124,7 @@ public class UserControls : MonoBehaviour {
 					if(bulding != null) {
 						creatingObjects.factory = bulding;
 						mode = Mode.SelectedBuilding;
+						return;
 					}
 				}
 				// For unit
@@ -176,7 +197,7 @@ public class UserControls : MonoBehaviour {
 				if (Input.GetMouseButtonDown(0))
 					DeselectAll();
 				if (Input.GetMouseButtonDown(1) && unitsController.units != null && Physics.Raycast(ray, out hit, 50.0f, 1 << 8)) {
-					Debug.Log(unitsController.units.Count);
+					Debug.Log("Units count: " + unitsController.units.Count);
 					foreach (var unit in unitsController.units) {
 						Map.instance.SetPath(pointer.position, unit);
 					}

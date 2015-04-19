@@ -52,7 +52,7 @@ public class Map : MonoBehaviour {
 
 	//HACK!
 	public GridPoint GetGridPoint(Vector3 point) {
-		const float eps = 0.3f;
+		const float eps = 0.5f;
 		float phi = 0.0f, teta = 0.0f;
 		for (int i = 0; i < width; ++i) {
 			teta = 0.0f;
@@ -66,6 +66,11 @@ public class Map : MonoBehaviour {
 		}
 
 		return null;
+	}
+
+	public Vector3 GetTFromCorе(Vector3 point) {
+		var p = GetGridPoint(point);
+		return new Vector3(p.x * bigTilings, p.y * smallTilings, 0.0f);
 	}
 
 	public void CalculateGrid() {
@@ -133,11 +138,12 @@ public class Map : MonoBehaviour {
 				thred.unit.UpdatePath(null);
 			}
 			else {
+				// Calculate path
 				List<Vector3> result = new List<Vector3>();
 				foreach (var point in thred.arg.path) {
 					var i = point.x;
 					var j = point.y;
-					result.Add(new Vector3((bigR + smallR * Mathf.Cos(smallTilings * j)) * Mathf.Cos(bigTilings * i), (bigR + smallR * Mathf.Cos(smallTilings * j)) * Mathf.Sin(bigTilings * i), smallR * Mathf.Sin(smallTilings * j)));
+					result.Add(new Vector3(bigTilings * i, smallTilings * j, 0.0f));
 				}
 				thred.unit.UpdatePath(result.ToArray());
 			}
