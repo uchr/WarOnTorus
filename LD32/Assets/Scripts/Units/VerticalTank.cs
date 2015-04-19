@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class HorizontalTank : Unit {
-	public float speed = 1.0f;
+public class VerticalTank : Unit {
+	public float speed = 0.7f;
 
 	private Torus torus;
 
