@@ -20,15 +20,15 @@ public class Map : MonoBehaviour {
 
 	private static Map _instance;
  
-    public static Map instance
-    {
-        get
-        {
-            if(_instance == null)
-                _instance = GameObject.FindObjectOfType<Map>();
-            return _instance;
-        }
-    }
+	public static Map instance
+	{
+		get
+		{
+			if(_instance == null)
+				_instance = GameObject.FindObjectOfType<Map>();
+			return _instance;
+		}
+	}
 
 	public Torus torus;
 
@@ -85,8 +85,8 @@ public class Map : MonoBehaviour {
 		}
 	}
 
-	public void SetPath(Vector3 from, Vector3 to, Unit unit) {
-		GridPoint s = GetGridPoint(from);
+	public void SetPath(Vector3 to, Unit unit) {
+		GridPoint s = GetGridPoint(unit.transform.position);
 		GridPoint g = GetGridPoint(to);
 
 		if (grid.grid[g.x, g.y]) {

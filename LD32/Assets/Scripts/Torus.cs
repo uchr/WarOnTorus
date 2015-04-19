@@ -5,15 +5,15 @@ using System.Collections.Generic;
 public class Torus : MonoBehaviour {
 	private static Torus _instance;
  
-    public static Torus instance
-    {
-        get
-        {
-            if(_instance == null)
-                _instance = GameObject.FindObjectOfType<Torus>();
-            return _instance;
-        }
-    }
+	public static Torus instance
+	{
+		get
+		{
+			if(_instance == null)
+				_instance = GameObject.FindObjectOfType<Torus>();
+			return _instance;
+		}
+	}
 
 	public float bigR = 10.0f;
 	public float smallR = 4.0f;
@@ -23,7 +23,7 @@ public class Torus : MonoBehaviour {
 
 	public Vector3 GetNormal(Vector3 point) {
 		float phi = GetPhi(point);
-		return (point - new Vector3(bigR * Mathf.Cos(phi), bigR * Mathf.Sin(phi), 0.0f));
+		return (point - new Vector3(bigR * Mathf.Cos(phi), bigR * Mathf.Sin(phi), 0.0f)).normalized;
 	}
 
 	private float GetPhi(Vector3 point) {
