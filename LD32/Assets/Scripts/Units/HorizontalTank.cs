@@ -46,8 +46,16 @@ public class HorizontalTank : Unit {
 	}
 
 	private void Update() {
+		if (hp <= 0)
+			Destroy(gameObject);
 		bool needGo = false;
+		if (timer >= 0.0f)
+			timer -= Time.deltaTime;
 		if (state == State.AttackUnit) {
+			if (goalUnit == null) {
+				state = State.Idle;
+				return;
+			}
 			if (Vector3.Distance(goalUnit.transform.position, cachedTransform.position) < fireLength) {
 				if (timer <= 0.0f) {
 					var bt = ((GameObject) Instantiate(bullet, cachedTransform.position, Quaternion.identity)).transform;
@@ -67,6 +75,10 @@ public class HorizontalTank : Unit {
 		}
 
 		if (state == State.AttackBuilding) {
+			if (goalBuilding == null) {
+				state = State.Idle;
+				return;
+			}
 			if (Vector3.Distance(goalBuilding.transform.position, cachedTransform.position) < fireLength) {
 				if (timer <= 0.0f) {
 					var bt = ((GameObject) Instantiate(bullet, cachedTransform.position, Quaternion.identity)).transform;
