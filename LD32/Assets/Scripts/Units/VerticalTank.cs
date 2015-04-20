@@ -57,7 +57,7 @@ public class VerticalTank : Unit {
 			foreach (var hit in hits) {
 				if (hit.transform.GetComponent<Building>() == goalBuilding && timer <= 0.0f) {
 					var bt = ((GameObject) Instantiate(bullet, cachedTransform.position, Quaternion.identity)).transform;
-					bt.up = (hit.point - cachedTransform.position).normalized;
+					bt.up = (goalBuilding.transform.position - cachedTransform.position).normalized;
 					var b = bt.GetComponent<Bullet>();
 					b.goal = goalBuilding.transform.position;
 					b.building = goalBuilding;

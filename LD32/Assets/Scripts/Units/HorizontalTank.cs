@@ -10,6 +10,11 @@ public class HorizontalTank : Unit {
 
 	public float fireLength;
 
+	public GameObject bullet;
+
+	public float time = 1.0f;
+	public float timer = 1.0f;
+
 	private State state = State.Idle;
 
 	private Vector3 firstGoalPosition;
@@ -44,7 +49,14 @@ public class HorizontalTank : Unit {
 		bool needGo = false;
 		if (state == State.AttackUnit) {
 			if (Vector3.Distance(goalUnit.transform.position, cachedTransform.position) < fireLength) {
-				Debug.Log("Fire!");
+				if (timer <= 0.0f) {
+					var bt = ((GameObject) Instantiate(bullet, cachedTransform.position, Quaternion.identity)).transform;
+					bt.up = (goalUnit.transform.position - cachedTransform.position).normalized;
+					var b = bt.GetComponent<Bullet>();
+					b.goal = goalUnit.transform.position;
+					b.unit = goalUnit;
+					timer = time;
+				}
 			}
 			else {
 				needGo = true;
@@ -56,7 +68,14 @@ public class HorizontalTank : Unit {
 
 		if (state == State.AttackBuilding) {
 			if (Vector3.Distance(goalBuilding.transform.position, cachedTransform.position) < fireLength) {
-				Debug.Log("Fire!");
+				if (timer <= 0.0f) {
+					var bt = ((GameObject) Instantiate(bullet, cachedTransform.position, Quaternion.identity)).transform;
+					bt.up = (goalBuilding.transform.position - cachedTransform.position).normalized;
+					var b = bt.GetComponent<Bullet>();
+					b.goal = goalBuilding.transform.position;
+					b.building = goalBuilding;
+					timer = time;
+				}
 			}
 			else {
 				needGo = true;
