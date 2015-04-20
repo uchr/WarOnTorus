@@ -36,10 +36,16 @@ public class VerticalTank : Unit {
 	}
 
 	private void Update() {
+		if (hp <= 0)
+			Destroy(gameObject);
 		bool needGo = false;
 		if (timer >= 0.0f)
 			timer -= Time.deltaTime;
 		if (state == State.AttackUnit) {
+			if (goalUnit == null) {
+				state = State.Idle;
+				return;
+			}
 			var hits = Physics.CapsuleCastAll(cachedTransform.position, cachedTransform.position + cachedTransform.up * fireHeight, fireWidth, cachedTransform.up, 1 << 11);
 			foreach (var hit in hits) {
 				if (hit.transform.GetComponent<Unit>() == goalUnit && timer <= 0.0f) {
@@ -53,6 +59,10 @@ public class VerticalTank : Unit {
 			}
 		}
 		if (state == State.AttackBuilding) {
+			if (goalBuilding == null) {
+				state = State.Idle;
+				return;
+			}
 			var hits = Physics.CapsuleCastAll(cachedTransform.position, cachedTransform.position + cachedTransform.up * fireHeight, fireWidth, cachedTransform.up, 1 << 10);
 			foreach (var hit in hits) {
 				if (hit.transform.GetComponent<Building>() == goalBuilding && timer <= 0.0f) {

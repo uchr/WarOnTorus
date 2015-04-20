@@ -57,11 +57,6 @@ public abstract class Unit : MonoBehaviour {
 		tPosition = Vector3.zero;
 	}
 
-	private void Update() {
-		if (hp <= 0)
-			Destroy(gameObject);
-	}
-
 	private void OnTriggerStay(Collider other) {
 		var unit = other.GetComponent<Unit>();
 		if (unit != null) {

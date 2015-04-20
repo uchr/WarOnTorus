@@ -19,10 +19,14 @@ public class Bullet : MonoBehaviour {
 	private void Update () {
 		cachedTransform.position += cachedTransform.up * speed * Time.deltaTime;
 		if (Vector3.Distance(cachedTransform.position, goal) < 0.1f) {
-			if (building != null)
+			if (building != null) {
+				//Debug.Log(building.hp);
 				building.hp -= 1;
-			if (unit != null)
+			}
+			if (unit != null) {
+				//Debug.Log(unit.hp);
 				unit.hp -= 1;
+			}
 			Destroy(gameObject);
 		}
 	}

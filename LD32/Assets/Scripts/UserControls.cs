@@ -203,7 +203,6 @@ public class UserControls : MonoBehaviour {
 				if (Input.GetMouseButtonDown(1) && unitsController.units != null) {
 					// Attack unit
 					if (Physics.Raycast(ray, out hit, 50.0f, 1 << 11)) {
-						Debug.Log("Attack unit!!!");
 						foreach (var unit in unitsController.units) {
 							var u = hit.transform.GetComponent<Unit>();
 							if (u != null && u.owner == 1)
@@ -212,7 +211,6 @@ public class UserControls : MonoBehaviour {
 					}
 					// Attack building
 					else if (Physics.Raycast(ray, out hit, 50.0f, 1 << 10)) {
-						Debug.Log("Attack building!!!");
 						foreach (var unit in unitsController.units) {
 							var b = hit.transform.GetComponent<Building>();
 							if (b != null && b.owner == 1)
