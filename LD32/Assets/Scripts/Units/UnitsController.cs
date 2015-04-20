@@ -31,13 +31,23 @@ public class UnitsController : MonoBehaviour {
 		}
 		if (inField.Count > 0) {
 			units = new List<Unit>();
-			foreach (var unit in inField)
-				units.Add(unit.GetComponent<Unit>());
+			foreach (var unit in inField) {
+				var u = unit.GetComponent<Unit>();
+				u.fireArea.SetActive(true);
+				units.Add(u);
+			}
 		}
 		else {
 			units = null;
 		}
-		if (units != null)
-			Debug.Log("Selected: " + units.Count);
+	}
+
+	public void UnselectUnits() {
+		if (units == null) 
+			return;
+		foreach (var unit in units){
+			unit.fireArea.SetActive(false);
+		}
+		units = null;
 	}
 }

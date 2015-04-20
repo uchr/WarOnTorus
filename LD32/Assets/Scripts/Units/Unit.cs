@@ -1,23 +1,47 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Unit : MonoBehaviour {
+public abstract class Unit : MonoBehaviour {
+	public int owner = 0;
+
+	public int hp = 5;
 
 	public float speed = 1.0f;
 	public float height = 1.0f;
 
-	private Torus torus;
+	protected Torus torus;
 	
 	public Vector3 tPosition;
+
+	public GameObject fireArea;
 
 	public Vector3[] path;
 	protected int i = 0;
 
-	private Transform cachedTransform;
+	protected Transform cachedTransform;
+
+	public abstract void Go(Vector3 goal);
+	public abstract void AttackUnit(Unit unit);
+	public abstract void AttackBuilding(Building building);
 
 	public void UpdatePath(Vector3[] path) {
 		i = 1;
 		this.path = path;
+	}
+
+	public void SetOwner(int owner) {
+		this.owner = owner;
+		var renderers = GetComponentsInChildren<Renderer>();
+		foreach (var r in renderers) {
+			if (r.gameObject.layer == 16) {
+				Debug.Log("Layer");
+				continue;
+			}
+			if (owner == 0)
+				r.material = BalanceSettings.instance.blue;
+			else
+				r.material = BalanceSettings.instance.red;
+		}
 	}
 
 	public void UpdatePosition(Vector3 forward) {
@@ -34,38 +58,15 @@ public class Unit : MonoBehaviour {
 	}
 
 	private void Update() {
-		if (path != null && i < path.Length) {
-			Vector3 dir = Vector3.zero;
-
-			if (tPosition.x <= Mathf.PI)
-				dir.x = Mathf.Abs(path[i].x - 2 * Mathf.PI - tPosition.x) < Mathf.Abs(path[i].x - tPosition.x) ? path[i].x - 2 * Mathf.PI : path[i].x;
-			else
-				dir.x = Mathf.Abs(path[i].x + 2 * Mathf.PI - tPosition.x) < Mathf.Abs(path[i].x - tPosition.x) ? path[i].x + 2 * Mathf.PI : path[i].x;
-
-			if (tPosition.y <= Mathf.PI)
-				dir.y = Mathf.Abs(path[i].y - 2 * Mathf.PI - tPosition.y) < Mathf.Abs(path[i].y - tPosition.y) ? path[i].y - 2 * Mathf.PI : path[i].y;
-			else
-				dir.y = Mathf.Abs(path[i].y + 2 * Mathf.PI - tPosition.y) < Mathf.Abs(path[i].y - tPosition.y) ? path[i].y + 2 * Mathf.PI : path[i].y;
-
-			tPosition += (dir - tPosition).normalized * speed * Time.deltaTime;
-
-			dir.x -= tPosition.x;
-			dir.y -= tPosition.y;
-			tPosition.x %= 2 * Mathf.PI;
-			tPosition.y %= 2 * Mathf.PI;
-
-			UpdatePosition(torus.GetCortPoint(path[i], height));
-
-			if ((Mathf.Sqrt(dir.x * dir.x + dir.y * dir.y)) < 0.08f) ++i;
-			if (i == path.Length) path = null;
-		}
+		if (hp <= 0)
+			Destroy(gameObject);
 	}
 
 	private void OnTriggerStay(Collider other) {
 		var unit = other.GetComponent<Unit>();
 		if (unit != null) {
 			var dir = unit.tPosition - tPosition;
-			tPosition -= (0.7f - dir.magnitude) * dir.normalized * BalanceSettings.instance.pushForce * Time.deltaTime;
+			tPosition -= (0.4f - dir.magnitude) * dir.normalized * BalanceSettings.instance.pushForce * Time.deltaTime;
 		}
 		var build = other.GetComponent<Building>();
 		if (build != null) {

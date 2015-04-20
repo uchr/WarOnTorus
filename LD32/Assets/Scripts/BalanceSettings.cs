@@ -28,6 +28,8 @@ public class BalanceSettings : MonoBehaviour {
         }
     }
 
+    public float updateGoalLength = 10.0f;
+
     public float pushForce = 10.0f;
 
     public int maxMinerals = 5;
@@ -41,4 +43,7 @@ public class BalanceSettings : MonoBehaviour {
 
     public UnitSettigns[] units;
     public BuildingSettings[] buildings;
+
+    public Material red;
+    public Material blue;
 }

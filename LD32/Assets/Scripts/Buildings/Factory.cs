@@ -34,7 +34,8 @@ public class Factory : Building {
 			if (unitProduction.time <= 0.0f) {
 				var unit = ((GameObject) Instantiate(bs.units[unitProduction.unitID].prefab, Vector3.zero, Quaternion.identity)).GetComponent<Unit>();
 				unit.tPosition = tForward;
-				unit.UpdatePosition(cachedTransform.position + cachedTransform.forward * 0.5f);
+				unit.SetOwner(owner);
+				unit.UpdatePosition(cachedTransform.position + cachedTransform.forward);
 				queue.Dequeue();
 			}
 		}

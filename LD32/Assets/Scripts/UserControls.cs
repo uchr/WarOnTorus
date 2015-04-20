@@ -77,7 +77,9 @@ public class UserControls : MonoBehaviour {
 						foreach (var sc in sphereColliders) {
 							sc.enabled = true;
 						}
-						creatingObjects.building.GetComponent<Building>().CortToTState();
+						var b = creatingObjects.building.GetComponent<Building>();
+						b.CortToTState();
+						b.SetOwner(0);
 					}
 					creatingObjects.building = null;
 					Map.instance.CalculateGrid();
@@ -130,7 +132,9 @@ public class UserControls : MonoBehaviour {
 				// For unit
 				if (Physics.Raycast(ray, out hit, 50.0f, 1 << 11) && unitsController.units == null) {
 					unitsController.units = new List<Unit>();
-					unitsController.units.Add(hit.transform.GetComponent<Unit>());
+					var u = hit.transform.GetComponent<Unit>();
+					u.fireArea.SetActive(true);
+					unitsController.units.Add(u);
 					mode = Mode.SelectedUnits;
 				}
 			}
@@ -170,7 +174,7 @@ public class UserControls : MonoBehaviour {
 
 	public void DeselectAll() {
 		mode = Mode.Default;
-		unitsController.units = null;
+		unitsController.UnselectUnits();
 		creatingObjects.factory = null;
 	}
 
@@ -196,10 +200,30 @@ public class UserControls : MonoBehaviour {
 			if (!EventSystem.current.IsPointerOverGameObject()) {
 				if (Input.GetMouseButtonDown(0))
 					DeselectAll();
-				if (Input.GetMouseButtonDown(1) && unitsController.units != null && Physics.Raycast(ray, out hit, 50.0f, 1 << 8)) {
-					Debug.Log("Units count: " + unitsController.units.Count);
-					foreach (var unit in unitsController.units) {
-						Map.instance.SetPath(pointer.position, unit);
+				if (Input.GetMouseButtonDown(1) && unitsController.units != null) {
+					// Attack unit
+					if (Physics.Raycast(ray, out hit, 50.0f, 1 << 11)) {
+						Debug.Log("Attack unit!!!");
+						foreach (var unit in unitsController.units) {
+							var u = hit.transform.GetComponent<Unit>();
+							if (u != null && u.owner == 1)
+								unit.AttackUnit(u);
+						}
+					}
+					// Attack building
+					else if (Physics.Raycast(ray, out hit, 50.0f, 1 << 10)) {
+						Debug.Log("Attack building!!!");
+						foreach (var unit in unitsController.units) {
+							var b = hit.transform.GetComponent<Building>();
+							if (b != null && b.owner == 1)
+								unit.AttackBuilding(b);
+						}
+					}
+					// Go
+					else if (Physics.Raycast(ray, out hit, 50.0f, 1 << 8)) {
+						foreach (var unit in unitsController.units) {
+							unit.Go(hit.point);
+						}
 					}
 				}
 			}
