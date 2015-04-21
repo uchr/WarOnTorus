@@ -36,6 +36,48 @@ public class Torus : MonoBehaviour {
 		return (p - c).normalized;
 	}
 
+	public void Test(Vector3 point) {
+		Vector3 rightPoint = GetCortPoint(new Vector3(0.0f, 0.0f, 0.0f));
+		Vector3 leftPoint = GetCortPoint(new Vector3(Mathf.PI, 0.0f, 0.0f));
+		Vector3 rightUpInflectionPoint = GetCortPoint(new Vector3(Mathf.PI / 4.0f, 0.0f, 0.0f));
+		float distanceToPoint = point.magnitude;
+		float distanceToOutside = GetCortPoint(new Vector3(0.0f, Mathf.PI / 2.0f, 0.0f)).magnitude;
+		float distanceToInflection = Vector3.Distance(rightPoint, rightUpInflectionPoint);
+
+		float phi = 0.0f, teta = 0.0f;
+
+		float sqrt = Mathf.Sqrt(smallR * smallR - point.z * point.z);
+		if (distanceToOutside <= distanceToPoint) {
+			if (Vector3.Distance(rightPoint, point) <= distanceToInflection || Vector3.Distance(leftPoint, point) <= distanceToInflection) {
+				phi = Mathf.Asin(Mathf.Clamp(point.y / (bigR + sqrt), -1.0f, 1.0f));
+				if (point.x <= 0.0f) phi = 3.0f * Mathf.PI - phi;
+			}
+			else {
+				phi = Mathf.Acos(Mathf.Clamp(point.x / (bigR + sqrt), -1.0f, 1.0f));
+				if (point.y <= 0.0f) phi = 2.0f * Mathf.PI - phi;
+			}
+		}
+		else {
+			if (Vector3.Distance(rightPoint, point) <= distanceToInflection || Vector3.Distance(leftPoint, point) <= distanceToInflection) {
+				phi = Mathf.Asin(Mathf.Clamp(point.y / (bigR - sqrt), -1.0f, 1.0f));
+				if (point.x <= 0.0f) phi = 3.0f * Mathf.PI - phi;
+			}
+			else {
+				phi = Mathf.Acos(Mathf.Clamp(point.x / (bigR - sqrt), -1.0f, 1.0f));
+				if (point.y <= 0.0f) phi = 2.0f * Mathf.PI - phi;
+			}
+		}
+		
+		//Debug.Log("Phi1: " + phi + " Phi2 " + phi2);
+		teta = Mathf.Asin(point.z / smallR);
+		if (distanceToOutside > distanceToPoint) teta = 3.0f * Mathf.PI - teta;
+		phi = Mathf.Repeat(phi, 2.0f * Mathf.PI);
+		teta = Mathf.Repeat(teta, 2.0f * Mathf.PI);
+		var t = GetCortPoint(new Vector3(phi, teta, 0.0f));
+		Debug.DrawLine(t, GetCortPoint(new Vector3(phi, teta, 0.0f), 10.0f), Color.green);
+		Debug.Log("Length: " + Vector3.Distance(t, point));
+	}
+
 	private float GetPhi(Vector3 point) {
 		return Mathf.Atan2(point.y, point.x);
 	}

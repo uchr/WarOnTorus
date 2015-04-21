@@ -44,11 +44,11 @@ public class CameraMovement : MonoBehaviour {
 			UpdatePosition();
 		}
 		if (Input.GetAxis("Mouse ScrollWheel") > 0) {
-			smallR -= step * 3.0f;
+			smallR -= step * 5.0f;
 			UpdatePosition();
 		}
 		if (Input.GetAxis("Mouse ScrollWheel") < 0) {
-			smallR += step * 3.0f;
+			smallR += step * 5.0f;
 			UpdatePosition();
 		}
 	}

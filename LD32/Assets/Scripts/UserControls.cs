@@ -227,6 +227,8 @@ public class UserControls : MonoBehaviour {
 			}
 		}
 		if (mode == Mode.Default) {
+			if (Input.GetMouseButton(0) && Physics.Raycast(ray, out hit, 50.0f, 1 << 8))
+				Torus.instance.Test(hit.point);
 			Select();
 		}
 
