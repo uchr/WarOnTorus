@@ -107,7 +107,7 @@ public class Grid {
 		// XY gluing
 		tMin = Mathf.Sqrt((start.x - gluingX) * (start.x - gluingX) + (start.y - gluingY) * (start.y - gluingY));
 		min = tMin < min ? tMin : min;
-		return (int) Mathf.Round(min);
+		return Mathf.RoundToInt(min);
 	}
 
 	private Collection<PathNode> GetNeighbours(PathNode pathNode, GridPoint goal) {

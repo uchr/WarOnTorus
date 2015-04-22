@@ -5,10 +5,8 @@ using System.Collections.Generic;
 public class Torus : MonoBehaviour {
 	private static Torus _instance;
  
-	public static Torus instance
-	{
-		get
-		{
+	public static Torus instance {
+		get	{
 			if(_instance == null)
 				_instance = GameObject.FindObjectOfType<Torus>();
 			return _instance;
@@ -26,7 +24,7 @@ public class Torus : MonoBehaviour {
 	}
 
 	public Vector3 GetNormal(Vector3 point) {
-		float phi = GetPhi(point);
+		float phi = Mathf.Atan2(point.y, point.x);
 		return (point - new Vector3(bigR * Mathf.Cos(phi), bigR * Mathf.Sin(phi), 0.0f)).normalized;
 	}
 
@@ -36,7 +34,11 @@ public class Torus : MonoBehaviour {
 		return (p - c).normalized;
 	}
 
-	public void Test(Vector3 point) {
+	public Vector3 GetNormal2(Vector3 point) {
+		return new Vector3(Mathf.Cos(point.x) * Mathf.Cos(point.y), Mathf.Sin(point.x) * Mathf.Cos(point.y), Mathf.Sin(point.y));
+	}
+
+	public Vector3 CartesianToTorus(Vector3 point) {
 		Vector3 rightPoint = GetCortPoint(new Vector3(0.0f, 0.0f, 0.0f));
 		Vector3 leftPoint = GetCortPoint(new Vector3(Mathf.PI, 0.0f, 0.0f));
 		Vector3 rightUpInflectionPoint = GetCortPoint(new Vector3(Mathf.PI / 4.0f, 0.0f, 0.0f));
@@ -68,18 +70,14 @@ public class Torus : MonoBehaviour {
 			}
 		}
 		
-		//Debug.Log("Phi1: " + phi + " Phi2 " + phi2);
 		teta = Mathf.Asin(point.z / smallR);
 		if (distanceToOutside > distanceToPoint) teta = 3.0f * Mathf.PI - teta;
 		phi = Mathf.Repeat(phi, 2.0f * Mathf.PI);
 		teta = Mathf.Repeat(teta, 2.0f * Mathf.PI);
-		var t = GetCortPoint(new Vector3(phi, teta, 0.0f));
-		Debug.DrawLine(t, GetCortPoint(new Vector3(phi, teta, 0.0f), 10.0f), Color.green);
-		Debug.Log("Length: " + Vector3.Distance(t, point));
-	}
-
-	private float GetPhi(Vector3 point) {
-		return Mathf.Atan2(point.y, point.x);
+		//var t = GetCortPoint(new Vector3(phi, teta, 0.0f));
+		//Debug.DrawLine(t, GetCortPoint(new Vector3(phi, teta, 0.0f), 10.0f), Color.green);
+		//Debug.Log("Length: " + Vector3.Distance(t, point));
+		return new Vector3(phi, teta, 0.0f);
 	}
 
 	private void Awake() {
