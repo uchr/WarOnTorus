@@ -1,20 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-[System.Serializable]
-public class UnitSettigns {
-	public GameObject prefab;
-	public int cost;
-	public float productionTime;
-}
-
-[System.Serializable]
-public class BuildingSettings {
-	public GameObject prefab;
-	public int cost;
-	public float productionTime;
-}
-
 public class BalanceSettings : MonoBehaviour {
 	private static BalanceSettings _instance;
  
@@ -40,9 +26,6 @@ public class BalanceSettings : MonoBehaviour {
     public int maxUnits = 20;
 
     public GameObject minerals;
-
-    public UnitSettigns[] units;
-    public BuildingSettings[] buildings;
 
     public Material red;
     public Material blue;

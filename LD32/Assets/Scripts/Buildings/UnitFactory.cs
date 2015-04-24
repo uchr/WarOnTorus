@@ -2,29 +2,33 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class Factory : Building {
+public class UnitFactory : Building {
 	private BalanceSettings bs;
 	private class UnitProduction {
 		public float time;
-		public int unitID;
+		public UnitSettings unitSettings;
+
+		public UnitProduction(UnitSettings unitSettings) {
+			this.unitSettings = unitSettings;
+			time = unitSettings.productionTime;
+		}
 	}
 
 	private Vector3 spawnPoint;
 
-	private Transform cachedTransform;
 	private Queue<UnitProduction> queue;
 
 	public bool Production(int id) {
 		if (queue.Count >= 6)
 			return false;
-		queue.Enqueue(new UnitProduction(){time = bs.units[id].productionTime, unitID = id});
+		var unitProduction = new UnitProduction(UnitsManager.instance.units[id]);
+		queue.Enqueue(unitProduction);
 		return true;
 	}
 
 	private void Awake() {
 		queue = new Queue<UnitProduction>();
 		cachedTransform = GetComponent<Transform>();
-		bs = BalanceSettings.instance;
 	}
 
 	private void Update() {
@@ -32,7 +36,8 @@ public class Factory : Building {
 			var unitProduction = queue.Peek();
 			unitProduction.time -= Time.deltaTime;
 			if (unitProduction.time <= 0.0f) {
-				var unit = ((GameObject) Instantiate(bs.units[unitProduction.unitID].prefab, Vector3.zero, Quaternion.identity)).GetComponent<Unit>();
+				var unit = ((GameObject) Instantiate(unitProduction.unitSettings.prefab, Vector3.zero, Quaternion.identity)).GetComponent<Unit>();
+				// TODO FIX IT
 				unit.tPosition = tForward;
 				unit.SetOwner(owner);
 				unit.UpdatePosition(cachedTransform.position + cachedTransform.forward);

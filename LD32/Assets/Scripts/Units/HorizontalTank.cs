@@ -21,7 +21,7 @@ public class HorizontalTank : Unit {
 	private Unit goalUnit;
 	private Building goalBuilding;
 
-	public override void Go(Vector3 goal) {
+	public override void Move(Vector3 goal) {
 		state = State.Idle;
 		Map.instance.SetPath(goal, this);
 	}
@@ -36,18 +36,19 @@ public class HorizontalTank : Unit {
 	public override void AttackBuilding(Building building) {
 		state = State.AttackBuilding;
 		goalBuilding = building;
-		// HACK!
-		if (AI.instance.leftFactory == building) {
-			Map.instance.SetPath(Torus.instance.GetCortPoint(new Vector3(Mathf.PI - 0.2f, 0.0f, 0.0f)), this);
-		}
-		if (AI.instance.rightFactory == building) {
-			Map.instance.SetPath(Torus.instance.GetCortPoint(new Vector3(Mathf.PI + 0.2f, 0.0f, 0.0f)), this);
-		}
+		// TODO FIX IT HACK!
+		//if (AI.instance.leftFactory == building) {
+		//	Map.instance.SetPath(Torus.instance.GetCortPoint(new Vector3(Mathf.PI - 0.2f, 0.0f, 0.0f)), this);
+		//}
+		//if (AI.instance.rightFactory == building) {
+		//	Map.instance.SetPath(Torus.instance.GetCortPoint(new Vector3(Mathf.PI + 0.2f, 0.0f, 0.0f)), this);
+		//}
 	}
 
 	private void Update() {
 		if (hp <= 0)
 			Destroy(gameObject);
+
 		bool needGo = false;
 		if (timer >= 0.0f)
 			timer -= Time.deltaTime;
@@ -115,10 +116,11 @@ public class HorizontalTank : Unit {
 
 			dir.x -= tPosition.x;
 			dir.y -= tPosition.y;
-			tPosition.x %= 2 * Mathf.PI;
-			tPosition.y %= 2 * Mathf.PI;
+			tPosition.x = Mathf.Repeat(tPosition.x, 2.0f * Mathf.PI);
+			tPosition.y = Mathf.Repeat(tPosition.y, 2.0f * Mathf.PI);
 
-			UpdatePosition(torus.GetCortPoint(path[i], height));
+			// TODO FIX IT
+			UpdatePosition(torus.TorusToCartesian(path[i] + new Vector3(0.0f, 0.0f, height)));
 
 			if ((Mathf.Sqrt(dir.x * dir.x + dir.y * dir.y)) < 0.08f) ++i;
 			if (i == path.Length) path = null;

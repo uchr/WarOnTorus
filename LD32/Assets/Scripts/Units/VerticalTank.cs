@@ -20,7 +20,7 @@ public class VerticalTank : Unit {
 	private Unit goalUnit;
 	private Building goalBuilding;
 
-	public override void Go(Vector3 goal) {
+	public override void Move(Vector3 goal) {
 		state = State.Idle;
 		Map.instance.SetPath(goal, this);
 	}
@@ -99,7 +99,8 @@ public class VerticalTank : Unit {
 			tPosition.x %= 2 * Mathf.PI;
 			tPosition.y %= 2 * Mathf.PI;
 
-			UpdatePosition(torus.GetCortPoint(path[i], height));
+			// TODO FIX IT
+			UpdatePosition(torus.TorusToCartesian(path[i] + Vector3.forward * height));
 
 			if ((Mathf.Sqrt(dir.x * dir.x + dir.y * dir.y)) < 0.08f) ++i;
 			if (i == path.Length) path = null;

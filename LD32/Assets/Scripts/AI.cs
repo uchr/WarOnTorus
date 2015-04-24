@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class AI : MonoBehaviour {
-	private static AI _instance;
+	/*private static AI _instance;
  
 	public static AI instance
 	{
@@ -123,5 +123,5 @@ public class AI : MonoBehaviour {
 			productionTimer -= Time.deltaTime;
 			peaceTimer -= Time.deltaTime;
 		}
-	}
+	}*/
 }

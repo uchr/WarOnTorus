@@ -7,237 +7,288 @@ using System.Collections.Generic;
 public class UserControls : MonoBehaviour {
 	public enum Mode {
 		Default,
-		ConstructBuilding,
 		SelectedBuilding,
-		SelectedUnits
+		SelectedTroop,
+		CreateBuilding,
+		RotateBuilding
 	};
 
+	public enum EventSelection {
+		None,
+		Unselected,
+		Selected
+	}
+
 	public Torus torus;
-	public Transform tangentSpace;
 
 	public Transform pointer;
 
-	public GameObject factoryMenu;
-	public GameObject unitsMenu;
+	public Text checkMode;
 
-	public bool field = false;
-	public GameObject fieldSelection;
-	public RectTransform transformField;
-	private Vector3 selectFrom;
-	private Vector3 selectTo;
+	// Menu
+	public GameObject[] buildingMenus;
+	public GameObject unitsMenu;
 
 	public Mode mode = Mode.Default;
 
-	public LayerMask layerMask;
+	// Mode.RotateBuilding && Mode.CreateBuilding
+	public Transform tangentSpace;
+	private Building createdBuilding;
 
-	private CreatingObjects creatingObjects;
-	private UnitsController unitsController;
+	// Mode.SelectedTroop
+	private Troop troop;
 
-	public void Construct() {
-		if(!EventSystem.current.IsPointerOverGameObject()) {
-			RaycastHit hit;
-			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-			if (Physics.Raycast(ray, out hit, 50.0f, 1 << 8)) {
-				if (!creatingObjects.rotate) {
-					RaycastHit hitMinerals;
-					if (creatingObjects.checkMinerals && !Physics.Raycast(ray, out hitMinerals, 50.0f, 1 << 14)) {
-						creatingObjects.building.transform.position = Vector3.down * 100.0f;
-						return;
-					}
-					if (creatingObjects.checkMinerals && Physics.Raycast(hitMinerals.point, (Camera.main.transform.position - hitMinerals.point).normalized, Vector3.Distance(Camera.main.transform.position,hitMinerals.point) / 2.0f, 1 << 8)) {
-						creatingObjects.building.transform.position = Vector3.down * 100.0f;
-						return;
-					}
-					if (Physics.Raycast(ray, 50.0f, 1 << 15)) {
-						creatingObjects.building.transform.position = Vector3.down * 100.0f;
-						return;
-					}
-					creatingObjects.building.position = hit.point;
-					creatingObjects.building.up = torus.GetNormal(hit.point);
-				}
-				if (Input.GetMouseButtonDown(0)) {
-					creatingObjects.rotate = true;
-					tangentSpace.position = hit.point;
-					tangentSpace.up = torus.GetNormal(hit.point);
-				}
-				if (Input.GetMouseButton(0)){
-					if (creatingObjects.rotate) {
-						RaycastHit tangentHit;
-						if(Physics.Raycast(ray, out tangentHit, 50.0f, 1 << 9)) {
-							var d = Vector3.Distance(tangentHit.point, creatingObjects.building.position);
-							if (1.0f <= d && d <= 5.0f)
-								creatingObjects.building.LookAt(tangentHit.point, tangentSpace.up);
-						}
-					}
-				}
-				if (Input.GetMouseButtonUp(0)) {
-					creatingObjects.construct = false;
-					if (creatingObjects.building != null) {
-						var sphereColliders = creatingObjects.building.GetComponentsInChildren<SphereCollider>();
-						foreach (var sc in sphereColliders) {
-							sc.enabled = true;
-						}
-						var b = creatingObjects.building.GetComponent<Building>();
-						b.CortToTState();
-						b.SetOwner(0);
-					}
-					creatingObjects.building = null;
-					Map.instance.CalculateGrid();
-					mode = Mode.Default;
-				}
-			}
-			else {
-				if (!creatingObjects.rotate)
-					creatingObjects.building.transform.position = Vector3.down * 100.0f;
-				if (Input.GetMouseButtonUp(0)) {
-					mode = Mode.Default;
-					creatingObjects.construct = false;
-					Destroy(creatingObjects.building.gameObject);
-				}
-			}
-		}
+	// Mode.SelectedBuilding
+	private Building building;
+
+	// SelectionArea
+	public GameObject selectionArea;
+	private bool isSelectionArea = false;
+	private RectTransform selectionAreaTransform;
+	private Vector3 selectionFrom;
+	private Vector3 selectionTo;
+
+	public void CreateBuilding(int id) {
+		Unselect();
+		createdBuilding = BuildingsManager.instance.CreateBuilding(id);
+		mode = Mode.CreateBuilding;
 	}
 
-	private void Select() {
-		//Field
-		if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject()) {
-			field = true;
-			selectFrom = Input.mousePosition;
-		}
-
-		if (Input.GetMouseButton(0) && selectFrom != Vector3.zero) {
-			selectTo = Input.mousePosition;
-		}
-
-		if (Input.GetMouseButtonUp(0)) {
-			unitsController.SelectUnits(selectFrom, selectTo);
-			if (unitsController.units != null)
-			mode = Mode.SelectedUnits;
-			field = false;
-		}
-
-		if(!EventSystem.current.IsPointerOverGameObject()) {
-			RaycastHit hit;
-			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-			if (Input.GetMouseButtonUp(0)) {
-				// For build
-				if (Physics.Raycast(ray, out hit, 100.0f, 1 << 10)) {
-					var bulding = hit.transform.GetComponent<Factory>();
-					if(bulding != null) {
-						creatingObjects.factory = bulding;
-						mode = Mode.SelectedBuilding;
-						return;
-					}
-				}
-				// For unit
-				if (Physics.Raycast(ray, out hit, 50.0f, 1 << 11) && unitsController.units == null) {
-					unitsController.units = new List<Unit>();
-					var u = hit.transform.GetComponent<Unit>();
-					u.fireArea.SetActive(true);
-					unitsController.units.Add(u);
-					mode = Mode.SelectedUnits;
-				}
-			}
-		}
-	}
-
-	private void SetupGUI() {
-		if (creatingObjects.factory != null)
-			factoryMenu.SetActive(true);
-		else 
-			factoryMenu.SetActive(false);
-
-		if (unitsController.units != null)
-			unitsMenu.SetActive(true);
-		else
-			unitsMenu.SetActive(false);
-
-		if (field && Vector3.Distance(selectFrom, selectTo) > 20.0f) {
-			fieldSelection.SetActive(true);
-			var min = new Vector2(Mathf.Min(selectFrom.x, selectTo.x), Mathf.Min(selectFrom.y, selectTo.y));
-			var max = new Vector2(Mathf.Max(selectFrom.x, selectTo.x), Mathf.Max(selectFrom.y, selectTo.y));
-			min.x -= Screen.width / 2;
-			max.x -= Screen.width / 2;
-			min.y -= Screen.height / 2;
-			max.y -= Screen.height / 2;
-			transformField.offsetMin = min;
-			transformField.offsetMax = max;
-		}
-		else {
-			fieldSelection.SetActive(false);
-		}
+	public void CreateUnit(int id) {
+		if (building.buildingType == BuildingType.UnitFactory)
+			((UnitFactory) building).Production(id);
 	}
 
 	public void SetMode(int mode) {
 		this.mode = (Mode) mode;
 	}
 
-	public void DeselectAll() {
-		mode = Mode.Default;
-		unitsController.UnselectUnits();
-		creatingObjects.factory = null;
-	}
-
-	private void Awake() {
-		creatingObjects = CreatingObjects.instance;
-		unitsController = UnitsController.instance;
-		DeselectAll();
-	}
-
-	private void Update() {
-		if (mode == Mode.ConstructBuilding) {
-			Construct();
+	private EventSelection Select() {
+		if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject()) {
+			isSelectionArea = true;
+			selectionArea.SetActive(true);
+			selectionFrom = Input.mousePosition;
 		}
-		if (mode == Mode.SelectedBuilding) {
-			if (!EventSystem.current.IsPointerOverGameObject()) {
-				if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1))
-					DeselectAll();
+
+		if (Input.GetMouseButton(0) && isSelectionArea) {
+			selectionTo = Input.mousePosition;
+			var min = new Vector2(Mathf.Min(selectionFrom.x, selectionTo.x), Mathf.Min(selectionFrom.y, selectionTo.y));
+			var max = new Vector2(Mathf.Max(selectionFrom.x, selectionTo.x), Mathf.Max(selectionFrom.y, selectionTo.y));
+			min.x -= Screen.width / 2.0f;
+			max.x -= Screen.width / 2.0f - 1.0f;
+			min.y -= Screen.height / 2.0f;
+			max.y -= Screen.height / 2.0f - 1.0f;
+			selectionAreaTransform.offsetMin = min;
+			selectionAreaTransform.offsetMax = max;
+		}
+
+		if (Input.GetMouseButtonUp(0) && isSelectionArea) {
+			isSelectionArea = false;
+			selectionArea.SetActive(false);
+			troop = UnitsManager.instance.GetTroopFromSelectionArea(selectionFrom, selectionTo);
+			if (troop != null) {
+				mode = Mode.SelectedTroop;
+				return EventSelection.Selected;
 			}
 		}
+
+		// TODO FIX IT Может быть подвинуть?
+		if(!EventSystem.current.IsPointerOverGameObject() && !isSelectionArea) {
+			RaycastHit hit;
+			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+			if (Input.GetMouseButtonUp(0)) {
+				if (Physics.Raycast(ray, out hit, 100.0f, 1 << 10)) { // Building layer
+					building = hit.transform.GetComponent<Building>();
+					mode = Mode.SelectedBuilding;
+					return EventSelection.Selected;
+				}
+
+				if (Physics.Raycast(ray, out hit, 50.0f, 1 << 11)) { // Unit layer
+					troop = new Troop();
+					troop.units = new Unit[1];
+					troop.units[0] = hit.transform.GetComponent<Unit>();
+					troop.Select();
+					mode = Mode.SelectedTroop;
+					return EventSelection.Selected;
+				}
+				return EventSelection.Unselected;
+			}
+		}
+		return EventSelection.None;
+	}
+
+	private void Unselect() {
+		mode = Mode.Default;
+		foreach (var menu in buildingMenus)
+			menu.SetActive(false);
+		unitsMenu.SetActive(false);
+
+		if (troop != null)
+			troop.Unselect();
+
+		troop = null;
+		building = null;
+	}
+
+	private void UpdatePointer(bool active = true) {
 		RaycastHit hit;
 		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-		if (mode == Mode.SelectedUnits) {
-			if (!EventSystem.current.IsPointerOverGameObject()) {
-				if (Input.GetMouseButtonDown(0))
-					DeselectAll();
-				if (Input.GetMouseButtonDown(1) && unitsController.units != null) {
-					// Attack unit
-					if (Physics.Raycast(ray, out hit, 50.0f, 1 << 11)) {
-						foreach (var unit in unitsController.units) {
-							var u = hit.transform.GetComponent<Unit>();
-							if (u != null && u.owner == 1)
-								unit.AttackUnit(u);
+		if (Physics.Raycast(ray, out hit, 50.0f, 1 << 8) && active) {
+			pointer.position = hit.point;
+			pointer.up = torus.GetNormalFromCartesian(hit.point);
+		}
+		else
+			pointer.position = Vector3.down * 100.0f;
+	}
+
+	private void RotateBuilding() {
+		UpdatePointer();
+		RaycastHit tangentHit;
+		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+		if (Input.GetMouseButton(0)) {
+			if(Physics.Raycast(ray, out tangentHit, 50.0f, 1 << 9)) { // TangentSpace layer
+				var d = Vector3.Distance(tangentHit.point, createdBuilding.cachedTransform .position);
+				if (1.0f <= d && d <= 5.0f)
+					createdBuilding.cachedTransform.LookAt(tangentHit.point, tangentSpace.up);
+			}
+		}
+
+		if (Input.GetMouseButtonUp(0)) {
+			var colliders = createdBuilding.GetComponentsInChildren<SphereCollider>();
+			foreach (var c in colliders)
+				c.enabled = true;
+			createdBuilding.Init(0);
+
+			createdBuilding = null;
+			Map.instance.CalculateGrid();
+			mode = Mode.Default;
+		}
+	}
+
+	private void CreateBuilding() {
+		UpdatePointer(false);
+		if(!EventSystem.current.IsPointerOverGameObject()) {
+			if (Input.GetMouseButtonUp(1)) {
+				Destroy(createdBuilding.gameObject);
+				mode = Mode.Default;
+			}
+
+			RaycastHit hit;
+			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+			if (Physics.Raycast(ray, out hit, 50.0f, 1 << 8)) { // Torus layer
+				if (createdBuilding.PossibleToBuild() && !Physics.Raycast(ray, 50.0f, 1 << 15)) { // BuldingIntersection layer
+					createdBuilding.cachedTransform.position = hit.point;
+					createdBuilding.cachedTransform.up = torus.GetNormalFromCartesian(hit.point);
+
+					if (Input.GetMouseButtonDown(0)) {
+						tangentSpace.position = hit.point;
+						tangentSpace.up = torus.GetNormalFromCartesian(hit.point);
+						mode = Mode.RotateBuilding;
+						return;
+					}
+				}
+			}
+			else {
+				createdBuilding.cachedTransform.position = Vector3.down * 100.0f;
+				if (Input.GetMouseButtonUp(0)) {
+					Destroy(createdBuilding.gameObject);
+					mode = Mode.Default;
+				}
+			}
+		}
+	}
+
+	private void SelectedTroop() {
+		UpdatePointer();
+
+		EventSelection eventSelection = Select();
+		if (eventSelection == EventSelection.Selected) return;
+		if (eventSelection == EventSelection.Unselected) {
+			Unselect();
+			return;
+		}
+
+		if(!EventSystem.current.IsPointerOverGameObject() && !isSelectionArea) {
+			RaycastHit hit;
+			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+			if (Physics.Raycast(ray, out hit, 50.0f, 1 << 8)) { // Torus layer
+				if (Input.GetMouseButtonDown(1)) {
+					if (Physics.Raycast(ray, out hit, 50.0f, 1 << 11)) { // Units layer
+						var unit = hit.transform.GetComponent<Unit>();
+						if (unit.owner == 1) {
+							troop.AttackUnit(unit);
+							return;
 						}
 					}
-					// Attack building
-					else if (Physics.Raycast(ray, out hit, 50.0f, 1 << 10)) {
-						foreach (var unit in unitsController.units) {
-							var b = hit.transform.GetComponent<Building>();
-							if (b != null && b.owner == 1)
-								unit.AttackBuilding(b);
+
+					if (Physics.Raycast(ray, out hit, 50.0f, 1 << 10)) { // Building layer
+						var building = hit.transform.GetComponent<Building>();
+						if (building.owner == 1) {
+							troop.AttackBuilding(building);
+							return;
 						}
 					}
-					// Go
-					else if (Physics.Raycast(ray, out hit, 50.0f, 1 << 8)) {
-						foreach (var unit in unitsController.units) {
-							unit.Go(hit.point);
-						}
+
+					if (Physics.Raycast(ray, out hit, 50.0f, 1 << 8)) { // Torus layer
+						troop.Move(torus.CartesianToTorus(hit.point));
+						return;
 					}
 				}
 			}
 		}
-		if (mode == Mode.Default) {
-			Select();
+
+		// TODO ADD UPDATE
+		unitsMenu.SetActive(true);
+	}
+
+	private void SelectedBuilding() {
+		UpdatePointer();
+
+		EventSelection eventSelection = Select();
+		if (eventSelection == EventSelection.Selected) return;
+		if (eventSelection == EventSelection.Unselected) {
+			Unselect();
+			return;
 		}
 
-		
-		SetupGUI();
-		if (mode != Mode.ConstructBuilding && Physics.Raycast(ray, out hit, 50.0f, 1 << 8)) {
-			pointer.position = hit.point;
-			pointer.up = torus.GetNormal(hit.point);
-		}
-		else {
-			pointer.position = Vector3.down * 100.0f;
+		// TODO FIX IT
+		// TODO ADD UPDATE
+		if (building != null)
+			buildingMenus[(int) building.buildingType].SetActive(true);
+	}
+
+	private void Default() {
+		UpdatePointer();
+		Select();
+	}
+
+	private void Awake() {
+		selectionAreaTransform = selectionArea.GetComponentInChildren<RectTransform>();
+		selectionArea.SetActive(false);
+	}
+
+	private void Update() {
+		switch (mode) {
+			case Mode.RotateBuilding:
+				RotateBuilding();
+				checkMode.text = "Mode.RotateBuilding";
+				break;
+			case Mode.CreateBuilding:
+				CreateBuilding();
+				checkMode.text = "Mode.CreateBuilding";
+				break;
+			case Mode.SelectedTroop:
+				checkMode.text = "Mode.SelectedTroop";
+				SelectedTroop();
+				break;
+			case Mode.SelectedBuilding:
+				checkMode.text = "Mode.SelectedBuilding";
+				SelectedBuilding();
+				break;
+			case Mode.Default:
+				checkMode.text = "Mode.Default";
+				Default();
+				break;
 		}
 	}
 }

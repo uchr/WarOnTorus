@@ -14,7 +14,7 @@ public class GridPoint {
 	}
 }
 
-public class Grid {
+public class TorusAStar {
 	public class PathNode {
 		// Координаты точки
 		public GridPoint position;
@@ -37,7 +37,7 @@ public class Grid {
 
 	public bool[,] grid;
 
-	public Grid(int width, int height) {
+	public TorusAStar(int width, int height) {
 		this.width = width;
 		this.height = height;
 

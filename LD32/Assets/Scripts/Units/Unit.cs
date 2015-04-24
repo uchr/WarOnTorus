@@ -4,6 +4,8 @@ using System.Collections;
 public abstract class Unit : MonoBehaviour {
 	public int owner = 0;
 
+	public UnitType unitType;
+
 	public int hp = 5;
 
 	public float speed = 1.0f;
@@ -20,9 +22,9 @@ public abstract class Unit : MonoBehaviour {
 
 	protected Transform cachedTransform;
 
-	public abstract void Go(Vector3 goal);
 	public abstract void AttackUnit(Unit unit);
 	public abstract void AttackBuilding(Building building);
+	public abstract void Move(Vector3 goal);
 
 	public void UpdatePath(Vector3[] path) {
 		i = 1;
@@ -33,10 +35,8 @@ public abstract class Unit : MonoBehaviour {
 		this.owner = owner;
 		var renderers = GetComponentsInChildren<Renderer>();
 		foreach (var r in renderers) {
-			if (r.gameObject.layer == 16) {
-				Debug.Log("Layer");
-				continue;
-			}
+			// TODO DELETE IT
+			if (r.gameObject.layer == 16) continue;
 			if (owner == 0)
 				r.material = BalanceSettings.instance.blue;
 			else
@@ -45,27 +45,28 @@ public abstract class Unit : MonoBehaviour {
 	}
 
 	public void UpdatePosition(Vector3 forward) {
-		Vector3 c = new Vector3(torus.bigR * Mathf.Cos(tPosition.x), torus.bigR * Mathf.Sin(tPosition.x), 0.0f);
-		cachedTransform.position = torus.GetCortPoint(tPosition, height);
-		cachedTransform.LookAt(forward, (cachedTransform.position - c).normalized);
+		cachedTransform.position = torus.TorusToCartesian(tPosition);
+		cachedTransform.LookAt(forward, torus.GetNormal2(tPosition));
 	}
 
 	private void Awake() {
 		torus = Torus.instance;
 		cachedTransform = GetComponent<Transform>();
 
-		tPosition = Vector3.zero;
+		tPosition = new Vector3(0.0f, 0.0f, height);
 	}
 
 	private void OnTriggerStay(Collider other) {
 		var unit = other.GetComponent<Unit>();
 		if (unit != null) {
-			var dir = unit.tPosition - tPosition;
+			// TODO FIX IT
+			var dir = unit.tPosition - tPosition + Vector3.left * 0.01f;
 			tPosition -= (0.4f - dir.magnitude) * dir.normalized * BalanceSettings.instance.pushForce * Time.deltaTime;
 		}
 		var build = other.GetComponent<Building>();
 		if (build != null) {
-			var dir = build.tPosition - tPosition;
+			// TODO FIX IT
+			var dir = build.tPosition - tPosition + Vector3.left * 0.01f;
 			tPosition -= (0.7f - dir.magnitude) * dir.normalized * BalanceSettings.instance.pushForce * Time.deltaTime;
 		}
 		UpdatePosition(cachedTransform.position + cachedTransform.forward);
@@ -74,9 +75,9 @@ public abstract class Unit : MonoBehaviour {
 	private void OnDrawGizmos() {
 		if (path != null && path.Length > 0) {
 			Gizmos.color = Color.green;
-			Vector3 prev = torus.GetCortPoint(path[0]);
+			Vector3 prev = torus.TorusToCartesian(path[0]);
 			foreach (var point in path) {
-				var p = torus.GetCortPoint(point);
+				var p = torus.TorusToCartesian(point);
 				Gizmos.DrawLine(prev, p);
 				prev = p;
 			}
