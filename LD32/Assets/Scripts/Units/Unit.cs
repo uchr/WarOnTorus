@@ -46,7 +46,8 @@ public abstract class Unit : MonoBehaviour {
 
 	public void UpdatePosition(Vector3 forward) {
 		cachedTransform.position = torus.TorusToCartesian(tPosition);
-		cachedTransform.LookAt(forward, torus.GetNormal2(tPosition));
+		if (Vector3.Distance(cachedTransform.position, forward) > 0.2f)
+			cachedTransform.LookAt(forward, torus.GetNormal2(tPosition));
 	}
 
 	private void Awake() {
@@ -60,7 +61,7 @@ public abstract class Unit : MonoBehaviour {
 		var unit = other.GetComponent<Unit>();
 		if (unit != null) {
 			// TODO FIX IT
-			var dir = unit.tPosition - tPosition + Vector3.left * 0.01f;
+			var dir = unit.tPosition - tPosition + Vector3.left * Random.Range(-0.2f, 0.2f) + Vector3.right * Random.Range(-0.2f, 0.2f);
 			tPosition -= (0.4f - dir.magnitude) * dir.normalized * BalanceSettings.instance.pushForce * Time.deltaTime;
 		}
 		var build = other.GetComponent<Building>();

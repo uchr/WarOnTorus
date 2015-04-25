@@ -1,11 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Minerals : Building {
+public class Mineral : Building {
 	public int saturation = 2000;
 	public bool busy = false;
 
-	public MineralsFactory mineralsFactory;
+	public MineralFactory mineralsFactory;
 
 	private float timer;
 

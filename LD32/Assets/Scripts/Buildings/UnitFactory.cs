@@ -3,8 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class UnitFactory : Building {
-	private BalanceSettings bs;
-	private class UnitProduction {
+	public class UnitProduction {
 		public float time;
 		public UnitSettings unitSettings;
 
@@ -16,7 +15,18 @@ public class UnitFactory : Building {
 
 	private Vector3 spawnPoint;
 
-	private Queue<UnitProduction> queue;
+	public Queue<UnitProduction> queue;
+
+	private Queue<Unit> units;
+
+	public Troop GetTroop() {
+		List<Unit> result = new List<Unit>();
+		for (int i = 0; i < 6 && units.Count > 0; ++i)
+			result.Add(units.Dequeue());
+		Troop troop = new Troop();
+		troop.units = result.ToArray();
+		return troop;
+	}
 
 	public bool Production(int id) {
 		if (queue.Count >= 6)
@@ -27,6 +37,7 @@ public class UnitFactory : Building {
 	}
 
 	private void Awake() {
+		units = new Queue<Unit>();
 		queue = new Queue<UnitProduction>();
 		cachedTransform = GetComponent<Transform>();
 	}
@@ -41,6 +52,7 @@ public class UnitFactory : Building {
 				unit.tPosition = tForward;
 				unit.SetOwner(owner);
 				unit.UpdatePosition(cachedTransform.position + cachedTransform.forward);
+				units.Enqueue(unit);
 				queue.Dequeue();
 			}
 		}

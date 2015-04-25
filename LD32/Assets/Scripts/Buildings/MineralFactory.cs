@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class MineralsFactory : Building {
+public class MineralFactory : Building {
 }

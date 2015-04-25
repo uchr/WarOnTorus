@@ -30,7 +30,7 @@ public class BuildingsManager : MonoBehaviour {
 
 	public BuildingSettings[] buildings;
 
-	public GameObject minerals;
+	public GameObject mineral;
 
 	public Building CreateBuilding(int id) {
 		var building = ((GameObject) Instantiate(buildings[id].prefab, Vector3.zero, Quaternion.identity)).GetComponent<Building>();
@@ -38,6 +38,7 @@ public class BuildingsManager : MonoBehaviour {
 	}
 
 	private void Awake() {
+		var minerals = new GameObject("Minerals");
 		Vector3 tPosition;
 		for (int i = 0; i < maxMinerals; ++i) {
 			tPosition.x = Random.Range(0.0f, 2.0f * Mathf.PI);
@@ -48,7 +49,8 @@ public class BuildingsManager : MonoBehaviour {
 				--i;
 				continue;
 			}
-			var t = ((GameObject) Instantiate(minerals, p, Quaternion.identity)).transform;
+			var t = ((GameObject) Instantiate(mineral, p, Quaternion.identity)).transform;
+			t.SetParent(minerals.transform);
 			t.up = Torus.instance.GetNormal2(tPosition);
 		}
 	}

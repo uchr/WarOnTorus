@@ -83,6 +83,7 @@ public class UserControls : MonoBehaviour {
 		}
 
 		if (Input.GetMouseButtonUp(0) && isSelectionArea) {
+			Unselect();
 			isSelectionArea = false;
 			selectionArea.SetActive(false);
 			troop = UnitsManager.instance.GetTroopFromSelectionArea(selectionFrom, selectionTo);
@@ -97,6 +98,7 @@ public class UserControls : MonoBehaviour {
 			RaycastHit hit;
 			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 			if (Input.GetMouseButtonUp(0)) {
+				Unselect();
 				if (Physics.Raycast(ray, out hit, 100.0f, 1 << 10)) { // Building layer
 					building = hit.transform.GetComponent<Building>();
 					mode = Mode.SelectedBuilding;
@@ -104,12 +106,15 @@ public class UserControls : MonoBehaviour {
 				}
 
 				if (Physics.Raycast(ray, out hit, 50.0f, 1 << 11)) { // Unit layer
-					troop = new Troop();
-					troop.units = new Unit[1];
-					troop.units[0] = hit.transform.GetComponent<Unit>();
-					troop.Select();
-					mode = Mode.SelectedTroop;
-					return EventSelection.Selected;
+					var unit = hit.transform.GetComponent<Unit>();
+					if (unit.owner == 0) {
+						troop = new Troop();
+						troop.units = new Unit[1];
+						troop.units[0] = unit;
+						troop.Select();
+						mode = Mode.SelectedTroop;
+						return EventSelection.Selected;
+					}
 				}
 				return EventSelection.Unselected;
 			}

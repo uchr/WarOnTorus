@@ -20,7 +20,6 @@ public class Torus : MonoBehaviour {
 	public int smallPartition = 40;
 
 	public Vector3 GetNormal2(Vector3 point) {
-		// TODO CHECK IT
 		return (new Vector3(Mathf.Cos(point.x) * Mathf.Cos(point.y), Mathf.Sin(point.x) * Mathf.Cos(point.y), Mathf.Sin(point.y))).normalized;
 	}
 

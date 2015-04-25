@@ -122,7 +122,7 @@ public class HorizontalTank : Unit {
 			// TODO FIX IT
 			UpdatePosition(torus.TorusToCartesian(path[i] + new Vector3(0.0f, 0.0f, height)));
 
-			if ((Mathf.Sqrt(dir.x * dir.x + dir.y * dir.y)) < 0.08f) ++i;
+			if ((Mathf.Sqrt(dir.x * dir.x + dir.y * dir.y)) < 0.12f) ++i;
 			if (i == path.Length) path = null;
 		}
 	}

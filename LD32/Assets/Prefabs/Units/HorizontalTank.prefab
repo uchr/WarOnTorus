@@ -417,7 +417,7 @@ MonoBehaviour:
   owner: 0
   unitType: 0
   hp: 5
-  speed: .5
+  speed: .100000001
   height: .100000001
   tPosition: {x: 0, y: 0, z: 0}
   fireArea: {fileID: 113492}

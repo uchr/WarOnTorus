@@ -57,7 +57,7 @@ public class Map : MonoBehaviour {
 			Vector3 c = new Vector3(bR * Mathf.Cos(phi), bR * Mathf.Sin(phi), 0.0f);
 			for(int j = 0; j < height; ++j) {
 				Vector3 p = new Vector3((bR + sR * Mathf.Cos(teta)) * Mathf.Cos(phi), (bR + sR * Mathf.Cos(teta)) * Mathf.Sin(phi), sR * Mathf.Sin(teta));
-				if(Physics.Raycast(c, p - c, sR * 2.0f, layerMask.value))
+				if(Physics.Raycast(c, p - c, sR * 1.2f, layerMask.value))
 					torusAStar.grid[i,j] = true;
 				else
 					torusAStar.grid[i,j] = false;
@@ -71,7 +71,6 @@ public class Map : MonoBehaviour {
 		if (unit == null)
 			return;
 
-		Debug.Log(unit.tPosition + " to " + to);
 		GridPoint s = GetGridPoint(unit.tPosition);
 		GridPoint g = GetGridPoint(to);
 

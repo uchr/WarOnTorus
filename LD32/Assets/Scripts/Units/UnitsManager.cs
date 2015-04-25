@@ -40,7 +40,6 @@ public class UnitsManager : MonoBehaviour {
 				result.Add(unit.GetComponent<Unit>());
 		}
 
-
 		if (result.Count > 0) {
 			Troop troop = new Troop();
 			troop.units = result.ToArray();
