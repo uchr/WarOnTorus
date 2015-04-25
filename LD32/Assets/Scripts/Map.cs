@@ -74,7 +74,7 @@ public class Map : MonoBehaviour {
 		GridPoint s = GetGridPoint(unit.tPosition);
 		GridPoint g = GetGridPoint(to);
 
-		if (torusAStar == null || torusAStar.grid == null || torusAStar.grid[g.x, g.y]) {
+		if (torusAStar.Passable(g)) {
 			unit.UpdatePath(null);
 			return;
 		}

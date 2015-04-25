@@ -4999,6 +4999,7 @@ MonoBehaviour:
   - prefab: {fileID: 177658, guid: c5bb805d58fedb045ac4efa455c10ad6, type: 2}
     cost: 0
     productionTime: 1
+  updatePathRadius: .200000003
 --- !u!1 &1745621899
 GameObject:
   m_ObjectHideFlags: 0

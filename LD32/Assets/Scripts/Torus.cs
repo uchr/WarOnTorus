@@ -19,6 +19,21 @@ public class Torus : MonoBehaviour {
 	public int largePartition = 50;
 	public int smallPartition = 40;
 
+	public float Distance(Vector3 p1, Vector3 p2) {
+		Vector3 t = Vector3.zero;
+		if (p1.x <= Mathf.PI)
+			t.x = Mathf.Abs(p2.x - 2 * Mathf.PI - p1.x) < Mathf.Abs(p2.x - p1.x) ? p2.x - 2 * Mathf.PI : p2.x;
+		else
+			t.x = Mathf.Abs(p2.x + 2 * Mathf.PI - p1.x) < Mathf.Abs(p2.x - p1.x) ? p2.x + 2 * Mathf.PI : p2.x;
+
+		if (p1.y <= Mathf.PI)
+			t.y = Mathf.Abs(p2.y - 2 * Mathf.PI - p1.y) < Mathf.Abs(p2.y - p1.y) ? p2.y - 2 * Mathf.PI : p2.y;
+		else
+			t.y = Mathf.Abs(p2.y + 2 * Mathf.PI - p1.y) < Mathf.Abs(p2.y - p1.y) ? p2.y + 2 * Mathf.PI : p2.y;
+		t -= p1;
+		return Mathf.Sqrt(t.x * t.x + t.y * t.y);
+	}
+
 	public Vector3 GetNormal2(Vector3 point) {
 		return (new Vector3(Mathf.Cos(point.x) * Mathf.Cos(point.y), Mathf.Sin(point.x) * Mathf.Cos(point.y), Mathf.Sin(point.y))).normalized;
 	}

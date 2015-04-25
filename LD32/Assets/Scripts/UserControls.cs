@@ -93,7 +93,6 @@ public class UserControls : MonoBehaviour {
 			}
 		}
 
-		// TODO FIX IT Может быть подвинуть?
 		if(!EventSystem.current.IsPointerOverGameObject() && !isSelectionArea) {
 			RaycastHit hit;
 			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -180,17 +179,15 @@ public class UserControls : MonoBehaviour {
 
 			RaycastHit hit;
 			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-			if (Physics.Raycast(ray, out hit, 50.0f, 1 << 8)) { // Torus layer
-				if (createdBuilding.PossibleToBuild() && !Physics.Raycast(ray, 50.0f, 1 << 15)) { // BuldingIntersection layer
-					createdBuilding.cachedTransform.position = hit.point;
-					createdBuilding.cachedTransform.up = torus.GetNormalFromCartesian(hit.point);
+			if (Physics.Raycast(ray, out hit, 50.0f, 1 << 8) && createdBuilding.PossibleToBuild() && !Physics.Raycast(ray, 50.0f, 1 << 15)) { // Torus layer BuldingIntersection layer
+				createdBuilding.cachedTransform.position = hit.point;
+				createdBuilding.cachedTransform.up = torus.GetNormalFromCartesian(hit.point);
 
-					if (Input.GetMouseButtonDown(0)) {
-						tangentSpace.position = hit.point;
-						tangentSpace.up = torus.GetNormalFromCartesian(hit.point);
-						mode = Mode.RotateBuilding;
-						return;
-					}
+				if (Input.GetMouseButtonDown(0)) {
+					tangentSpace.position = hit.point;
+					tangentSpace.up = torus.GetNormalFromCartesian(hit.point);
+					mode = Mode.RotateBuilding;
+					return;
 				}
 			}
 			else {

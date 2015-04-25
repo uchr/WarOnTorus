@@ -17,20 +17,21 @@ public class HorizontalTank : Unit {
 
 	private State state = State.Idle;
 
-	private Vector3 firstGoalPosition;
+	private Vector3 tCurrent;
 	private Unit goalUnit;
 	private Building goalBuilding;
 
 	public override void Move(Vector3 goal) {
 		state = State.Idle;
 		Map.instance.SetPath(goal, this);
+		isReached = false;
 	}
 
 	public override void AttackUnit(Unit unit) {
 		state = State.AttackUnit;
 		goalUnit = unit;
-		firstGoalPosition = goalUnit.transform.position;
-		Map.instance.SetPath(goalUnit.transform.position, this);
+		tCurrent = goalUnit.tPosition;
+		Map.instance.SetPath(goalUnit.tPosition, this);
 	}
 
 	public override void AttackBuilding(Building building) {
@@ -52,12 +53,15 @@ public class HorizontalTank : Unit {
 		bool needGo = false;
 		if (timer >= 0.0f)
 			timer -= Time.deltaTime;
+
 		if (state == State.AttackUnit) {
 			if (goalUnit == null) {
 				state = State.Idle;
+				path = null;
 				return;
 			}
-			if (Vector3.Distance(goalUnit.transform.position, cachedTransform.position) < fireLength) {
+
+			if (Vector3.Distance(goalUnit.tPosition, tPosition) < fireLength) {
 				if (timer <= 0.0f) {
 					var bt = ((GameObject) Instantiate(bullet, cachedTransform.position, Quaternion.identity)).transform;
 					bt.up = (goalUnit.transform.position - cachedTransform.position).normalized;
@@ -70,8 +74,10 @@ public class HorizontalTank : Unit {
 			else {
 				needGo = true;
 			}
-			if (path == null || Vector3.Distance(goalUnit.transform.position, firstGoalPosition) > BalanceSettings.instance.updateGoalLength) {
-				Map.instance.SetPath(goalUnit.transform.position, this);
+
+			if (path == null || Vector3.Distance(goalUnit.tPosition, tCurrent) > UnitsManager.instance.updatePathRadius) {
+				tCurrent = goalUnit.tPosition;
+				Map.instance.SetPath(goalUnit.tPosition, this);
 			}
 		}
 
@@ -122,8 +128,11 @@ public class HorizontalTank : Unit {
 			// TODO FIX IT
 			UpdatePosition(torus.TorusToCartesian(path[i] + new Vector3(0.0f, 0.0f, height)));
 
-			if ((Mathf.Sqrt(dir.x * dir.x + dir.y * dir.y)) < 0.12f) ++i;
-			if (i == path.Length) path = null;
+			if ((Mathf.Sqrt(dir.x * dir.x + dir.y * dir.y)) < 0.08f) ++i;
+			if (i == path.Length) {
+				isReached = true;
+				path = null;
+			}
 		}
 	}
 

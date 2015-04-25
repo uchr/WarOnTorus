@@ -25,7 +25,12 @@ public class UnitsManager : MonoBehaviour {
 		}
 	}
 
+	public int maxUnits = 10;
+	public int currentUnits = 0;
+
 	public UnitSettings[] units;
+
+	public float updatePathRadius = 0.2f;
 
 	public Troop GetTroopFromSelectionArea(Vector3 from, Vector3 to) {
 		var min = new Vector2(Mathf.Min(from.x, to.x), Mathf.Min(from.y, to.y));
@@ -36,8 +41,9 @@ public class UnitsManager : MonoBehaviour {
 		List<Unit> result = new List<Unit>();
 		foreach (var unit in units) {
 			var p = Camera.main.WorldToScreenPoint(unit.transform.position);
-			if (unit.GetComponent<Unit>().owner == 0 && result.Count <= 6 && rect.Contains(new Vector2(p.x, p.y)) && !Physics.Raycast(unit.transform.position, Camera.main.transform.position - unit.transform.position, 50.0f, 1 << 8))
-				result.Add(unit.GetComponent<Unit>());
+			var u = unit.GetComponent<Unit>();
+			if (u != null && u.owner == 0 && result.Count <= 6 && rect.Contains(new Vector2(p.x, p.y)) && !Physics.Raycast(unit.transform.position, Camera.main.transform.position - unit.transform.position, 50.0f, 1 << 8))
+				result.Add(u);
 		}
 
 		if (result.Count > 0) {

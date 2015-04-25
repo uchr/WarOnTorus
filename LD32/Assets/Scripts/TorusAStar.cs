@@ -44,6 +44,12 @@ public class TorusAStar {
 		grid = new bool[width, height];
 	}
 
+	public bool Passable(GridPoint p) {
+		if (p.x < 0 || p.x >= width || p.y < 0 || p.y >= height)
+			return false;
+		return grid[p.x, p.y];
+	}
+
 	public void FindPath(object arg) {
 		GridPoint start = ((Arg) arg).start;
 		GridPoint goal = ((Arg) arg).goal;
@@ -69,7 +75,7 @@ public class TorusAStar {
 			openSet.Remove(currentNode);
 			closedSet.Add(currentNode);
 			// HACK!
-			if (currentNode.pathLengthFromStart > 60) {
+			if (currentNode.pathLengthFromStart > 50) {
 				return;
 			}
 			foreach (var neighbourNode in GetNeighbours(currentNode, goal)) {

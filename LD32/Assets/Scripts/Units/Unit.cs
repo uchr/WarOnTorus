@@ -17,6 +17,8 @@ public abstract class Unit : MonoBehaviour {
 
 	public GameObject fireArea;
 
+	public bool isReached = false;
+
 	public Vector3[] path;
 	protected int i = 0;
 
@@ -30,6 +32,8 @@ public abstract class Unit : MonoBehaviour {
 		i = 1;
 		this.path = path;
 	}
+
+	private int col = 0;
 
 	public void SetOwner(int owner) {
 		this.owner = owner;
@@ -45,6 +49,8 @@ public abstract class Unit : MonoBehaviour {
 	}
 
 	public void UpdatePosition(Vector3 forward) {
+		tPosition.x = Mathf.Repeat(tPosition.x, 2.0f * Mathf.PI);
+		tPosition.y = Mathf.Repeat(tPosition.y, 2.0f * Mathf.PI);
 		cachedTransform.position = torus.TorusToCartesian(tPosition);
 		if (Vector3.Distance(cachedTransform.position, forward) > 0.2f)
 			cachedTransform.LookAt(forward, torus.GetNormal2(tPosition));
@@ -57,18 +63,25 @@ public abstract class Unit : MonoBehaviour {
 		tPosition = new Vector3(0.0f, 0.0f, height);
 	}
 
+	private void Update() {
+		col = 0;
+	}
+
 	private void OnTriggerStay(Collider other) {
+		//if (col > 3) return;
+		++col;
+
 		var unit = other.GetComponent<Unit>();
 		if (unit != null) {
 			// TODO FIX IT
 			var dir = unit.tPosition - tPosition + Vector3.left * Random.Range(-0.2f, 0.2f) + Vector3.right * Random.Range(-0.2f, 0.2f);
-			tPosition -= (0.4f - dir.magnitude) * dir.normalized * BalanceSettings.instance.pushForce * Time.deltaTime;
+			tPosition -= (0.4f - dir.magnitude) * dir.normalized * BalanceSettings.instance.pushForce * Time.fixedDeltaTime;
 		}
 		var build = other.GetComponent<Building>();
 		if (build != null) {
 			// TODO FIX IT
 			var dir = build.tPosition - tPosition + Vector3.left * 0.01f;
-			tPosition -= (0.7f - dir.magnitude) * dir.normalized * BalanceSettings.instance.pushForce * Time.deltaTime;
+			tPosition -= (0.7f - dir.magnitude) * dir.normalized * BalanceSettings.instance.pushForce * Time.fixedDeltaTime;
 		}
 		UpdatePosition(cachedTransform.position + cachedTransform.forward);
 	}

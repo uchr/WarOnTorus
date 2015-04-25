@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -29,6 +29,9 @@ public class AI : MonoBehaviour {
 
 	private Troop leftTroop;
 	private Troop rightTroop;
+
+	private Unit leftGoalUnit;
+	private Unit rightGoalUnit;
 
 	private bool isWar = false;
 
@@ -74,11 +77,11 @@ public class AI : MonoBehaviour {
 
 		Map.instance.CalculateGrid();
 
-		Production(6);
+		Production(5);
 	}
 
 	private void Update() {
-		if(!isWar && leftFactory.queue.Count == 0 && rightFactory.queue.Count == 0) {
+		if (!isWar && leftFactory.queue.Count == 0 && rightFactory.queue.Count == 0) {
 			
 			leftTroop = leftFactory.GetTroop();
 			rightTroop = rightFactory.GetTroop();
@@ -87,5 +90,35 @@ public class AI : MonoBehaviour {
 			rightTroop.Move(tRightTroopPosition);
 			isWar = true;
 		}
+
+		if (isWar) {
+			if (leftTroop.InSitu() && leftGoalUnit == null) {
+				var units = GameObject.FindGameObjectsWithTag("Unit");
+				List<Unit> enemies = new List<Unit>();
+				foreach (var unit in units) {
+					var u = unit.GetComponent<Unit>();
+					if (u != null && u.owner == 0)
+						enemies.Add(u);
+				}
+				if (enemies.Count > 0) {
+					Unit goal = null;
+					float distance = 0;
+					foreach (var enemy in enemies) {
+						if (goal == null) {
+							goal = enemy;
+							distance = Torus.instance.Distance(tPosition, goal.tPosition);
+							continue;
+						}
+						if (Torus.instance.Distance(tPosition, enemy.tPosition) < distance) {
+							goal = enemy;
+							distance = Torus.instance.Distance(tPosition, goal.tPosition);
+						}
+					}
+					leftGoalUnit = goal;
+					leftTroop.AttackUnit(leftGoalUnit);
+				}
+			}
+		}
+
 	}
 }
