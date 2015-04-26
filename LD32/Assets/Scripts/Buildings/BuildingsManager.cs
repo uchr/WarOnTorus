@@ -32,6 +32,15 @@ public class BuildingsManager : MonoBehaviour {
 
 	public GameObject mineral;
 
+	public float recalculateTime = 0.05f;
+	private float recalculateTimer;
+	private bool recalculate;
+
+	public void Recalculate() {
+		recalculateTimer = recalculateTime;
+		recalculate = true;
+	}
+
 	public Building CreateBuilding(int id) {
 		var building = ((GameObject) Instantiate(buildings[id].prefab, Vector3.zero, Quaternion.identity)).GetComponent<Building>();
 		return building;
@@ -52,6 +61,14 @@ public class BuildingsManager : MonoBehaviour {
 			var t = ((GameObject) Instantiate(mineral, p, Quaternion.identity)).transform;
 			t.SetParent(minerals.transform);
 			t.up = Torus.instance.GetNormal2(tPosition);
+		}
+	}
+
+	private void Update() {
+		if (recalculateTimer > 0.0f) recalculateTimer -= Time.deltaTime;
+		if (recalculate && recalculateTimer <= 0.0f) {
+			Map.instance.CalculateGrid();
+			recalculate = false;
 		}
 	}
 }

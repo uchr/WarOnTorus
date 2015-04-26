@@ -42,7 +42,8 @@ public class UnitFactory : Building {
 		cachedTransform = GetComponent<Transform>();
 	}
 
-	private void Update() {
+	protected override void Update() {
+		base.Update();
 		if (queue.Count > 0) {
 			var unitProduction = queue.Peek();
 			unitProduction.time -= Time.deltaTime;

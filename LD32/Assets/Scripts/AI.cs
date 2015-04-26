@@ -15,20 +15,22 @@ public class AI : MonoBehaviour {
 		}
 	}
 
-	public Vector3 tPosition;
-	public Vector3 tLeftFactoryPosition;
-	public Vector3 tRightFactoryPosition;
-	public Vector3 tLeftFactoryPositionForward;
-	public Vector3 tRightFactoryPositionForward;
+	public float timeBeforeAttack = 10.0f;
+	public float timerBeforeAttack = 0.0f;
 
-	public Vector3 tLeftTroopPosition;
-	public Vector3 tRightTroopPosition;
+	private Vector3 tPosition;
+	private Vector3 tLeftFactoryPosition;
+	private Vector3 tRightFactoryPosition;
+	private Vector3 tLeftFactoryPositionForward;
+	private Vector3 tRightFactoryPositionForward;
+	private Vector3 tLeftTroopPosition;
+	private Vector3 tRightTroopPosition;
 
 	private UnitFactory leftFactory;
 	private UnitFactory rightFactory;
 
-	private Troop leftTroop;
-	private Troop rightTroop;
+	public Troop leftTroop;
+	public Troop rightTroop;
 
 	private Unit leftGoalUnit;
 	private Unit rightGoalUnit;
@@ -43,13 +45,12 @@ public class AI : MonoBehaviour {
 	}
 
 	private void Awake() {
-		// Init base position
+		// Init positions
 		tPosition = new Vector3(Mathf.PI, 0.0f, 0.0f);
 		tLeftFactoryPosition = new Vector3(Mathf.PI - 0.1f, 0.0f, 0.0f);
 		tRightFactoryPosition = new Vector3(Mathf.PI + 0.1f, 0.0f, 0.0f);
 		tLeftFactoryPositionForward = new Vector3(Mathf.PI - 0.12f, 0.0f, 0.0f);
 		tRightFactoryPositionForward = new Vector3(Mathf.PI + 0.12f, 0.0f, 0.0f);
-
 		tLeftTroopPosition = new Vector3(Mathf.PI / 2.0f, 0.0f, 0.0f);
 		tRightTroopPosition = new Vector3(3.0f * Mathf.PI / 2.0f, 0.0f, 0.0f);
 
@@ -81,8 +82,9 @@ public class AI : MonoBehaviour {
 	}
 
 	private void Update() {
+		if (timerBeforeAttack > 0.0f) timerBeforeAttack -= Time.deltaTime;
 		if (!isWar && leftFactory.queue.Count == 0 && rightFactory.queue.Count == 0) {
-			
+			timerBeforeAttack = timeBeforeAttack;
 			leftTroop = leftFactory.GetTroop();
 			rightTroop = rightFactory.GetTroop();
 
@@ -91,8 +93,9 @@ public class AI : MonoBehaviour {
 			isWar = true;
 		}
 
-		if (isWar) {
+		if (isWar && timerBeforeAttack <= 0.0f) {
 			if (leftTroop.InSitu() && leftGoalUnit == null) {
+				// TODO FIX FOR VERY LONG DISTANCE
 				var units = GameObject.FindGameObjectsWithTag("Unit");
 				List<Unit> enemies = new List<Unit>();
 				foreach (var unit in units) {

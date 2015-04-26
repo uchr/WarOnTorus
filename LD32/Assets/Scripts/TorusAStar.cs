@@ -97,21 +97,22 @@ public class TorusAStar {
 
 	private int GetHeuristicPathLength(GridPoint start, GridPoint goal) {
 		float tMin;
-		int gluingX = goal.x, gluingY = goal.y;
-		float min = Mathf.Sqrt((start.x - goal.x) * (start.x - goal.x) + (start.y - goal.y) * (start.y - goal.y));
+		int distanceX = start.x - goal.x, distanceY = start.y - goal.y;
+		int gluingX = 0, gluingY = 0;
+		float min = Mathf.Sqrt(distanceX * distanceX + distanceY * distanceY);
 		
 		// X gluing
-		gluingX = (start.x < (width / 2)) ? goal.x - width : goal.x + width;
-		tMin = Mathf.Sqrt((start.x - gluingX) * (start.x - gluingX) + (start.y - goal.y) * (start.y - goal.y));
+		gluingX = (start.x < (width / 2)) ? distanceX + width : distanceX - width;
+		tMin = Mathf.Sqrt(gluingX * gluingX + distanceY * distanceY);
 		min = tMin < min ? tMin : min;
 		
 		// Y gluing
-		gluingY = (start.y < (height / 2)) ? goal.y - height : goal.y + height;
-		tMin = Mathf.Sqrt((start.x - goal.x) * (start.x - goal.x) + (start.y - gluingY) * (start.y - gluingY));
+		gluingY = (start.y < (height / 2)) ? distanceY + height : distanceY - height;
+		tMin = Mathf.Sqrt(distanceX * distanceX + gluingY * gluingY);
 		min = tMin < min ? tMin : min;
 		
 		// XY gluing
-		tMin = Mathf.Sqrt((start.x - gluingX) * (start.x - gluingX) + (start.y - gluingY) * (start.y - gluingY));
+		tMin = Mathf.Sqrt(gluingX * gluingX + gluingY * gluingY);
 		min = tMin < min ? tMin : min;
 		return Mathf.RoundToInt(min);
 	}
@@ -119,15 +120,11 @@ public class TorusAStar {
 	private Collection<PathNode> GetNeighbours(PathNode pathNode, GridPoint goal) {
 		var result = new Collection<PathNode>();
 
-		GridPoint[] neighbourPoints = new GridPoint[8];
+		GridPoint[] neighbourPoints = new GridPoint[4];
 		neighbourPoints[0] = new GridPoint(pathNode.position.x + 1, pathNode.position.y);
-		neighbourPoints[1] = new GridPoint(pathNode.position.x + 1, pathNode.position.y + 1);
-		neighbourPoints[2] = new GridPoint(pathNode.position.x, pathNode.position.y + 1);
-		neighbourPoints[3] = new GridPoint(pathNode.position.x - 1, pathNode.position.y + 1);
-		neighbourPoints[4] = new GridPoint(pathNode.position.x - 1, pathNode.position.y);
-		neighbourPoints[5] = new GridPoint(pathNode.position.x - 1, pathNode.position.y - 1);
-		neighbourPoints[6] = new GridPoint(pathNode.position.x, pathNode.position.y - 1);
-		neighbourPoints[7] = new GridPoint(pathNode.position.x + 1, pathNode.position.y - 1);
+		neighbourPoints[1] = new GridPoint(pathNode.position.x, pathNode.position.y + 1);
+		neighbourPoints[2] = new GridPoint(pathNode.position.x - 1, pathNode.position.y);
+		neighbourPoints[3] = new GridPoint(pathNode.position.x, pathNode.position.y - 1);
 
 		foreach (var point in neighbourPoints) {
 			if (point.x < 0)

@@ -16,7 +16,7 @@ public class Building : MonoBehaviour {
 	public void Init(int owner) {
 		tPosition = Torus.instance.CartesianToTorus(cachedTransform.position);
 		// TODO FIX
-		tForward = Torus.instance.CartesianToTorus(transform.position + transform.forward * 1.6f);
+		tForward = Torus.instance.CartesianToTorus(transform.position + transform.forward * 2.0f);
 
 		this.owner = owner;
 		var renderers = GetComponentsInChildren<Renderer>();
@@ -37,9 +37,11 @@ public class Building : MonoBehaviour {
 		cachedTransform = GetComponent<Transform>();
 	}
 
-	private void Update() {
+	protected virtual void Update() {
 		// TODO ADD ANIMATION
-		if (hp <= 0)
+		if (hp <= 0) {
 			Destroy(gameObject);
+			BuildingsManager.instance.Recalculate();
+		}
 	}
 }

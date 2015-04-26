@@ -47,6 +47,13 @@ public class Torus : MonoBehaviour {
 		return new Vector3((bR + (point.z + sR) * Mathf.Cos(point.y)) * Mathf.Cos(point.x), (bR + (point.z + sR) * Mathf.Cos(point.y)) * Mathf.Sin(point.x), (point.z + sR) * Mathf.Sin(point.y));
 	}
 
+	public Vector3 Repeat(Vector3 point) {
+		var t = point;
+		t.x = Mathf.Repeat(t.x, 2.0f * Mathf.PI - 0.05f);
+		t.y = Mathf.Repeat(t.y, 2.0f * Mathf.PI - 0.05f);
+		return t;
+	}
+
 	public Vector3 CartesianToTorus(Vector3 point) {
 		Vector3 rightPoint = TorusToCartesian(new Vector3(0.0f, 0.0f, 0.0f));
 		Vector3 leftPoint = TorusToCartesian(new Vector3(Mathf.PI, 0.0f, 0.0f));

@@ -105,8 +105,10 @@ public class Map : MonoBehaviour {
 			if (!thred.thred.IsAlive)
 				deads.Add(thred);
 		}
+
 		foreach (var thred in deads) {
 			if (thred.arg.path == null) {
+				Debug.Log("Path not found " + thred.arg.goal.x + " " + thred.arg.goal.y);
 				thred.unit.UpdatePath(null);
 			}
 			else {
@@ -124,11 +126,13 @@ public class Map : MonoBehaviour {
 	}
 	
 	private GridPoint GetGridPoint(Vector3 point) {
+		if (point.x < 0.0f || point.x >= 2.0f * Mathf.PI || point.y < 0.0f || point.y >= 2.0f * Mathf.PI)
+			Debug.LogError("Outside point " + point);
+
 		int i = Mathf.RoundToInt(point.x / largePartition), j = Mathf.RoundToInt(point.y / smallPartition);
 
 		return new GridPoint(i, j);
 	}
-
 
 	private void Awake() {
 		width = torus.largePartition * largePartitionFactor;

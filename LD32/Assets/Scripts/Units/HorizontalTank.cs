@@ -27,33 +27,30 @@ public class HorizontalTank : Unit {
 		isReached = false;
 	}
 
-	public override void AttackUnit(Unit unit) {
+	public override void AttackUnit(Unit unit, Vector3 relativeAttackPosition) {
+		this.relativeAttackPosition = relativeAttackPosition;
 		state = State.AttackUnit;
 		goalUnit = unit;
-		tCurrent = goalUnit.tPosition;
-		Map.instance.SetPath(goalUnit.tPosition, this);
+		tCurrent = Torus.instance.Repeat(goalUnit.tPosition + relativeAttackPosition);
+		Map.instance.SetPath(tCurrent, this);
 	}
 
-	public override void AttackBuilding(Building building) {
+	public override void AttackBuilding(Building building, Vector3 relativeAttackPosition) {
+		this.relativeAttackPosition = relativeAttackPosition;
 		state = State.AttackBuilding;
 		goalBuilding = building;
-		// TODO FIX IT HACK!
-		//if (AI.instance.leftFactory == building) {
-		//	Map.instance.SetPath(Torus.instance.GetCortPoint(new Vector3(Mathf.PI - 0.2f, 0.0f, 0.0f)), this);
-		//}
-		//if (AI.instance.rightFactory == building) {
-		//	Map.instance.SetPath(Torus.instance.GetCortPoint(new Vector3(Mathf.PI + 0.2f, 0.0f, 0.0f)), this);
-		//}
+		Map.instance.SetPath(Torus.instance.Repeat(goalBuilding.tPosition + relativeAttackPosition), this);
 	}
 
-	private void Update() {
+	protected override void Update() {
+		base.Update();
 		if (hp <= 0)
 			Destroy(gameObject);
 
-		bool needGo = false;
 		if (timer >= 0.0f)
 			timer -= Time.deltaTime;
 
+		bool needGo = false;
 		if (state == State.AttackUnit) {
 			if (goalUnit == null) {
 				state = State.Idle;
@@ -61,7 +58,7 @@ public class HorizontalTank : Unit {
 				return;
 			}
 
-			if (Vector3.Distance(goalUnit.tPosition, tPosition) < fireLength) {
+			if (Torus.instance.Distance(goalUnit.tPosition, tPosition) < fireLength) {
 				if (timer <= 0.0f) {
 					var bt = ((GameObject) Instantiate(bullet, cachedTransform.position, Quaternion.identity)).transform;
 					bt.up = (goalUnit.transform.position - cachedTransform.position).normalized;
@@ -75,18 +72,20 @@ public class HorizontalTank : Unit {
 				needGo = true;
 			}
 
-			if (path == null || Vector3.Distance(goalUnit.tPosition, tCurrent) > UnitsManager.instance.updatePathRadius) {
-				tCurrent = goalUnit.tPosition;
-				Map.instance.SetPath(goalUnit.tPosition, this);
+			var t = Torus.instance.Repeat(goalUnit.tPosition + relativeAttackPosition);
+			if (path == null || Torus.instance.Distance(t, tCurrent) > UnitsManager.instance.updatePathRadius) {
+				tCurrent = Torus.instance.Repeat(goalUnit.tPosition + relativeAttackPosition);
+				Map.instance.SetPath(tCurrent, this);
 			}
 		}
 
 		if (state == State.AttackBuilding) {
 			if (goalBuilding == null) {
 				state = State.Idle;
+				path = null;
 				return;
 			}
-			if (Vector3.Distance(goalBuilding.transform.position, cachedTransform.position) < fireLength) {
+			if (Torus.instance.Distance(goalBuilding.tPosition, tPosition) <= fireLength) {
 				if (timer <= 0.0f) {
 					var bt = ((GameObject) Instantiate(bullet, cachedTransform.position, Quaternion.identity)).transform;
 					bt.up = (goalBuilding.transform.position - cachedTransform.position).normalized;
@@ -118,7 +117,9 @@ public class HorizontalTank : Unit {
 			else
 				dir.y = Mathf.Abs(path[i].y + 2 * Mathf.PI - tPosition.y) < Mathf.Abs(path[i].y - tPosition.y) ? path[i].y + 2 * Mathf.PI : path[i].y;
 
-			tPosition += (dir - tPosition).normalized * speed * Time.deltaTime;
+			var t = (dir - tPosition).normalized;
+			tPosition.x += t.x * phiSpeed * Time.deltaTime;
+			tPosition.y += t.y * tetaSpeed * Time.deltaTime;
 
 			dir.x -= tPosition.x;
 			dir.y -= tPosition.y;
@@ -128,7 +129,7 @@ public class HorizontalTank : Unit {
 			// TODO FIX IT
 			UpdatePosition(torus.TorusToCartesian(path[i] + new Vector3(0.0f, 0.0f, height)));
 
-			if ((Mathf.Sqrt(dir.x * dir.x + dir.y * dir.y)) < 0.08f) ++i;
+			if (Mathf.Sqrt(dir.x * dir.x + dir.y * dir.y) < 0.08f) ++i;
 			if (i == path.Length) {
 				isReached = true;
 				path = null;

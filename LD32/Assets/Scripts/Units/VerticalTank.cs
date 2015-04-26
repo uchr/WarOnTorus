@@ -25,12 +25,12 @@ public class VerticalTank : Unit {
 		Map.instance.SetPath(goal, this);
 	}
 
-	public override void AttackUnit(Unit unit) {
+	public override void AttackUnit(Unit unit, Vector3 attackPosition) {
 		state = State.AttackUnit;
 		goalUnit = unit;
 	}
 
-	public override void AttackBuilding(Building building) {
+	public override void AttackBuilding(Building building, Vector3 relativeAttackPosition) {
 		state = State.AttackBuilding;
 		goalBuilding = building;
 	}

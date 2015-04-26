@@ -9,6 +9,8 @@ public abstract class Unit : MonoBehaviour {
 	public int hp = 5;
 
 	public float speed = 1.0f;
+	protected float phiSpeed = 1.0f;
+	protected float tetaSpeed = 1.0f;
 	public float height = 1.0f;
 
 	protected Torus torus;
@@ -19,13 +21,15 @@ public abstract class Unit : MonoBehaviour {
 
 	public bool isReached = false;
 
+	protected Vector3 relativeAttackPosition;
+
 	public Vector3[] path;
 	protected int i = 0;
 
 	protected Transform cachedTransform;
 
-	public abstract void AttackUnit(Unit unit);
-	public abstract void AttackBuilding(Building building);
+	public abstract void AttackUnit(Unit unit, Vector3 relativeAttackPosition);
+	public abstract void AttackBuilding(Building building, Vector3 relativeAttackPosition);
 	public abstract void Move(Vector3 goal);
 
 	public void UpdatePath(Vector3[] path) {
@@ -61,26 +65,29 @@ public abstract class Unit : MonoBehaviour {
 		cachedTransform = GetComponent<Transform>();
 
 		tPosition = new Vector3(0.0f, 0.0f, height);
+
+		var deltaPhi = Vector3.Distance(torus.TorusToCartesian(Vector3.zero), torus.TorusToCartesian(new Vector3(speed, 0.0f, 0.0f)));
+		var deltaTeta = Vector3.Distance(torus.TorusToCartesian(Vector3.zero), torus.TorusToCartesian(new Vector3(0.0f, speed, 0.0f)));
+		phiSpeed = speed;
+		tetaSpeed = speed * (deltaPhi / deltaTeta);
 	}
 
-	private void Update() {
+	protected virtual void Update() {
 		col = 0;
 	}
 
 	private void OnTriggerStay(Collider other) {
-		//if (col > 3) return;
+		if (col > 6) return;
 		++col;
 
 		var unit = other.GetComponent<Unit>();
 		if (unit != null) {
-			// TODO FIX IT
-			var dir = unit.tPosition - tPosition + Vector3.left * Random.Range(-0.2f, 0.2f) + Vector3.right * Random.Range(-0.2f, 0.2f);
+			var dir = unit.tPosition - tPosition + Vector3.right * Random.Range(-0.02f, 0.03f) + Vector3.up * Random.Range(-0.02f, 0.03f);
 			tPosition -= (0.4f - dir.magnitude) * dir.normalized * BalanceSettings.instance.pushForce * Time.fixedDeltaTime;
 		}
 		var build = other.GetComponent<Building>();
 		if (build != null) {
-			// TODO FIX IT
-			var dir = build.tPosition - tPosition + Vector3.left * 0.01f;
+			var dir = build.tPosition - tPosition + Vector3.right * Random.Range(-0.02f, 0.03f) + Vector3.up * Random.Range(-0.02f, 0.03f);
 			tPosition -= (0.7f - dir.magnitude) * dir.normalized * BalanceSettings.instance.pushForce * Time.fixedDeltaTime;
 		}
 		UpdatePosition(cachedTransform.position + cachedTransform.forward);

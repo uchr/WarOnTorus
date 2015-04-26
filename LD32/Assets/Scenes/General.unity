@@ -3832,13 +3832,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b776a798c73054347b2b734692832634, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tPosition: {x: 0, y: 0, z: 0}
-  tLeftFactoryPosition: {x: 0, y: 0, z: 0}
-  tRightFactoryPosition: {x: 0, y: 0, z: 0}
-  tLeftFactoryPositionForward: {x: 0, y: 0, z: 0}
-  tRightFactoryPositionForward: {x: 0, y: 0, z: 0}
-  tLeftTroopPosition: {x: 0, y: 0, z: 0}
-  tRightTroopPosition: {x: 0, y: 0, z: 0}
+  timeBeforeAttack: 2
+  timerBeforeAttack: 0
+  leftTroop:
+    units: []
+  rightTroop:
+    units: []
 --- !u!4 &1310651768
 Transform:
   m_ObjectHideFlags: 0
@@ -4992,6 +4991,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e733fe4029c8784789ea79ae437e86c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxUnits: 10
+  currentUnits: 0
   units:
   - prefab: {fileID: 155430, guid: 4d7b9dc38ac40304492cc89264dce6dc, type: 2}
     cost: 0
@@ -5456,11 +5457,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   torus: {fileID: 1357978186}
-  largePartitionFactor: 4
-  smallPartitionFactor: 4
+  largePartitionFactor: 3
+  smallPartitionFactor: 3
   layerMask:
     serializedVersion: 2
-    m_Bits: 1024
+    m_Bits: 17408
 --- !u!4 &2003670360
 Transform:
   m_ObjectHideFlags: 0
