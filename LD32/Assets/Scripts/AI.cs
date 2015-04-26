@@ -16,7 +16,8 @@ public class AI : MonoBehaviour {
 	}
 
 	public float timeBeforeAttack = 10.0f;
-	public float timerBeforeAttack = 0.0f;
+	public float timerBeforeAttackLeft = 0.0f;
+	public float timerBeforeAttackRight = 0.0f;
 
 	private Vector3 tPosition;
 	private Vector3 tLeftFactoryPosition;
@@ -35,7 +36,8 @@ public class AI : MonoBehaviour {
 	private Unit leftGoalUnit;
 	private Unit rightGoalUnit;
 
-	private bool isWar = false;
+	private bool isWarLeft = false;
+	private bool isWarRight = false;
 
 	private void Production(int n) {
 		for (int i = 0; i < n; ++i) {
@@ -82,20 +84,18 @@ public class AI : MonoBehaviour {
 	}
 
 	private void Update() {
-		if (timerBeforeAttack > 0.0f) timerBeforeAttack -= Time.deltaTime;
-		if (!isWar && leftFactory.queue.Count == 0 && rightFactory.queue.Count == 0) {
-			timerBeforeAttack = timeBeforeAttack;
+		if (timerBeforeAttackLeft > 0.0f) timerBeforeAttackLeft -= Time.deltaTime;
+		if (!isWarLeft && leftFactory.queue.Count == 0) {
+			timerBeforeAttackLeft = timeBeforeAttack;
 			leftTroop = leftFactory.GetTroop();
-			rightTroop = rightFactory.GetTroop();
 
 			leftTroop.Move(tLeftTroopPosition);
-			rightTroop.Move(tRightTroopPosition);
-			isWar = true;
+			isWarLeft = true;
 		}
 
-		if (isWar && timerBeforeAttack <= 0.0f) {
+		if (isWarLeft && timerBeforeAttackLeft <= 0.0f) {
 			if (leftTroop.InSitu() && leftGoalUnit == null) {
-				// TODO FIX FOR VERY LONG DISTANCE
+				// TODO FIX FOR VERY LONG DISTANCE !!!
 				var units = GameObject.FindGameObjectsWithTag("Unit");
 				List<Unit> enemies = new List<Unit>();
 				foreach (var unit in units) {
@@ -122,6 +122,11 @@ public class AI : MonoBehaviour {
 				}
 			}
 		}
-
+		if (isWarLeft && leftTroop.GetCount() == 0) {
+			isWarLeft = false;
+			for (int i = 0; i < 5; ++i) {
+				leftFactory.Production(0);
+			}
+		}
 	}
 }

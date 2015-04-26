@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 [System.Serializable]
 public class Troop {
@@ -10,6 +11,18 @@ public class Troop {
 			if (!unit.isReached)
 				return false;
 		return true;
+	}
+
+	// DIRTY HACK
+	// Resize when someone dies, adding a unit to the knowledge of the troop
+	public int GetCount() {
+		if (units == null) return 0;
+		List<Unit> inAlive = new List<Unit>();
+		foreach (var unit in units)
+			if (unit != null)
+				inAlive.Add(unit);
+		units = inAlive.ToArray();
+		return units.Length;
 	}
 
 	public void Select() {
@@ -24,7 +37,7 @@ public class Troop {
 
 	// TODO FIX CHOICE IMPASSABLE AREAS IN ATTACKUNIT/ATTACKBUILDING/MOVE
 	public void AttackUnit(Unit goalUnit) {
-		float r = 0.07f;
+		float r = 0.08f;
 		Vector3 t;
 		var angle = (2.0f * Mathf.PI) / units.Length;
 		for (int i = 0; i < units.Length; ++i) {
@@ -44,7 +57,7 @@ public class Troop {
 	}
 
 	public void Move(Vector3 goal) {
-		float r = 0.07f;
+		float r = 0.09f;
 		var t = goal;
 		units[0].Move(t);
 		var angle = (2.0f * Mathf.PI) / (units.Length - 1);
