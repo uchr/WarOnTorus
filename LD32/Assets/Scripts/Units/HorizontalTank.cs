@@ -60,6 +60,7 @@ public class HorizontalTank : Unit {
 
 			if (Torus.instance.Distance(goalUnit.tPosition, tPosition) < fireLength) {
 				if (timer <= 0.0f) {
+					UpdatePosition(Torus.instance.TorusToCartesian(goalUnit.tPosition));
 					var bt = ((GameObject) Instantiate(bullet, cachedTransform.position, Quaternion.identity)).transform;
 					bt.up = (goalUnit.transform.position - cachedTransform.position).normalized;
 					var b = bt.GetComponent<Bullet>();
@@ -87,6 +88,7 @@ public class HorizontalTank : Unit {
 			}
 			if (Torus.instance.Distance(goalBuilding.tPosition, tPosition) <= fireLength) {
 				if (timer <= 0.0f) {
+					UpdatePosition(Torus.instance.TorusToCartesian(goalBuilding.tPosition));
 					var bt = ((GameObject) Instantiate(bullet, cachedTransform.position, Quaternion.identity)).transform;
 					bt.up = (goalBuilding.transform.position - cachedTransform.position).normalized;
 					var b = bt.GetComponent<Bullet>();
@@ -123,8 +125,6 @@ public class HorizontalTank : Unit {
 
 			dir.x -= tPosition.x;
 			dir.y -= tPosition.y;
-			tPosition.x = Mathf.Repeat(tPosition.x, 2.0f * Mathf.PI);
-			tPosition.y = Mathf.Repeat(tPosition.y, 2.0f * Mathf.PI);
 
 			// TODO FIX IT
 			UpdatePosition(torus.TorusToCartesian(path[i] + new Vector3(0.0f, 0.0f, height)));

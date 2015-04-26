@@ -52,12 +52,11 @@ public abstract class Unit : MonoBehaviour {
 		}
 	}
 
-	public void UpdatePosition(Vector3 forward) {
-		tPosition.x = Mathf.Repeat(tPosition.x, 2.0f * Mathf.PI);
-		tPosition.y = Mathf.Repeat(tPosition.y, 2.0f * Mathf.PI);
+	public void UpdatePosition(Vector3 lookAt) {
+		tPosition = Torus.instance.Repeat(tPosition);
 		cachedTransform.position = torus.TorusToCartesian(tPosition);
-		if (Vector3.Distance(cachedTransform.position, forward) > 0.2f)
-			cachedTransform.LookAt(forward, torus.GetNormal2(tPosition));
+		if (Vector3.Distance(cachedTransform.position, lookAt) > 0.2f)
+			cachedTransform.LookAt(lookAt, torus.GetNormal2(tPosition));
 	}
 
 	private void Awake() {
