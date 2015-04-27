@@ -13,6 +13,17 @@ public class Troop {
 		return true;
 	}
 
+	public Vector3 center {
+		get {
+			if (units.Length == 0)
+				return Vector3.zero;
+			Vector3 center = Vector3.zero;
+			foreach (var unit in units)
+				center += unit.tPosition;
+			return center / units.Length;
+		}
+	}
+
 	// DIRTY HACK
 	// Resize when someone dies, adding a unit to the knowledge of the troop
 	public int GetCount() {
