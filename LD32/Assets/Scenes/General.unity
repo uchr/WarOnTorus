@@ -1066,6 +1066,7 @@ MonoBehaviour:
     cost: 0
     productionTime: 0
   mineral: {fileID: 137126, guid: 179f84a56bbcefa468939d5c289b0772, type: 2}
+  recalculateTime: .0500000007
 --- !u!1 &470479660
 GameObject:
   m_ObjectHideFlags: 0
@@ -1486,6 +1487,12 @@ MonoBehaviour:
   - {fileID: 732575569}
   - {fileID: 951136741}
   unitsMenu: {fileID: 400378834}
+  buildingMenuTexts:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  unitsMenuText: {fileID: 2043300613}
   mode: 0
   tangentSpace: {fileID: 705382604}
   selectionArea: {fileID: 1509261998}
@@ -3832,12 +3839,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b776a798c73054347b2b734692832634, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  timeBeforeAttack: 2
-  timerBeforeAttack: 0
-  leftTroop:
-    units: []
-  rightTroop:
-    units: []
+  cycles:
+  - factoryPosition: {x: 3.13000011, y: 0, z: 0}
+    waitingPosition: {x: 1.57000005, y: 0, z: 0}
+    tanksNumber: 5
+    waitTime: .5
+    action: 0
+  - factoryPosition: {x: 3.17000008, y: 0, z: 0}
+    waitingPosition: {x: 4.69999981, y: 0, z: 0}
+    tanksNumber: 5
+    waitTime: .5
+    action: 0
 --- !u!4 &1310651768
 Transform:
   m_ObjectHideFlags: 0
@@ -4255,7 +4267,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1509261999
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5457,6 +5469,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   torus: {fileID: 1357978186}
+  maxDistance: 4
   largePartitionFactor: 3
   smallPartitionFactor: 3
   layerMask:

@@ -6,10 +6,12 @@ public class UnitFactory : Building {
 	public class UnitProduction {
 		public float time;
 		public UnitSettings unitSettings;
+		public UnitType unitType;
 
-		public UnitProduction(UnitSettings unitSettings) {
-			this.unitSettings = unitSettings;
+		public UnitProduction(int id) {
+			unitSettings = UnitsManager.instance.units[id];
 			time = unitSettings.productionTime;
+			unitType = (UnitType) id;
 		}
 	}
 
@@ -31,7 +33,7 @@ public class UnitFactory : Building {
 	public bool Production(int id) {
 		if (queue.Count >= 6)
 			return false;
-		var unitProduction = new UnitProduction(UnitsManager.instance.units[id]);
+		var unitProduction = new UnitProduction(id);
 		queue.Enqueue(unitProduction);
 		return true;
 	}
@@ -50,6 +52,7 @@ public class UnitFactory : Building {
 			if (unitProduction.time <= 0.0f) {
 				var unit = ((GameObject) Instantiate(unitProduction.unitSettings.prefab, Vector3.zero, Quaternion.identity)).GetComponent<Unit>();
 				// TODO FIX IT
+				unit.unitType = unitProduction.unitType;
 				unit.tPosition = tForward;
 				unit.SetOwner(owner);
 				unit.UpdatePosition(cachedTransform.position + cachedTransform.forward);

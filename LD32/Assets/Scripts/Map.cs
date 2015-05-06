@@ -32,6 +32,8 @@ public class Map : MonoBehaviour {
 
 	public Torus torus;
 
+	public float maxDistance = 3.0f;
+
 	public int largePartitionFactor = 3;
 	public int smallPartitionFactor = 3;
 

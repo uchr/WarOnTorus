@@ -6,7 +6,7 @@ using System.Collections.Generic;
 public class Troop {
 	public Unit[] units;
 
-	public bool InSitu() {
+	public bool Arrived() {
 		foreach (var unit in units)
 			if (!unit.isReached)
 				return false;
@@ -58,7 +58,7 @@ public class Troop {
 	}
 
 	public void AttackBuilding(Building goalBuilding) {
-		float r = 0.12f;
+		float r = 0.15f;
 		Vector3 t;
 		var angle = (2.0f * Mathf.PI) / units.Length;
 		for (int i = 0; i < units.Length; ++i) {

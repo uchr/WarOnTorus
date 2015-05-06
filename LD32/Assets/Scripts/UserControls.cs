@@ -28,6 +28,8 @@ public class UserControls : MonoBehaviour {
 	// Menu
 	public GameObject[] buildingMenus;
 	public GameObject unitsMenu;
+	public Text[] buildingMenuTexts;
+	public Text unitsMenuText;
 
 	public Mode mode = Mode.Default;
 
@@ -203,13 +205,6 @@ public class UserControls : MonoBehaviour {
 	private void SelectedTroop() {
 		UpdatePointer();
 
-		EventSelection eventSelection = Select();
-		if (eventSelection == EventSelection.Selected) return;
-		if (eventSelection == EventSelection.Unselected) {
-			Unselect();
-			return;
-		}
-
 		if(!EventSystem.current.IsPointerOverGameObject() && !isSelectionArea) {
 			RaycastHit hit;
 			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -239,12 +234,45 @@ public class UserControls : MonoBehaviour {
 			}
 		}
 
-		// TODO ADD UPDATE
+		// TODO MOVE TO TROOP
 		unitsMenu.SetActive(true);
+		string descriptionTroop = "";
+		for (int i = 0; i < troop.GetCount(); ++i) {
+			descriptionTroop += (i + 1) + ".";
+			switch (troop.units[i].unitType) {
+				case UnitType.HorizontalTank:
+					descriptionTroop += " HorizontalTank";
+					break;
+				case UnitType.VerticalTank:
+					descriptionTroop += " VerticalTank";
+					break;
+			}
+			descriptionTroop += "\n";
+		}
+		unitsMenuText.text = descriptionTroop;
+
+		EventSelection eventSelection = Select();
+		if (eventSelection == EventSelection.Selected) return;
+		if (eventSelection == EventSelection.Unselected) {
+			Unselect();
+			return;
+		}
 	}
 
 	private void SelectedBuilding() {
+		if (building == null) {
+			Unselect();
+			return;
+		}
+
 		UpdatePointer();
+
+		// TODO FIX IT
+		// TODO ADD UPDATE
+		if (building != null) {
+			int numberBuildingType = (int) building.buildingType;
+			buildingMenus[numberBuildingType].SetActive(true);
+		}
 
 		EventSelection eventSelection = Select();
 		if (eventSelection == EventSelection.Selected) return;
@@ -253,10 +281,6 @@ public class UserControls : MonoBehaviour {
 			return;
 		}
 
-		// TODO FIX IT
-		// TODO ADD UPDATE
-		if (building != null)
-			buildingMenus[(int) building.buildingType].SetActive(true);
 	}
 
 	private void Default() {
@@ -265,6 +289,7 @@ public class UserControls : MonoBehaviour {
 	}
 
 	private void Awake() {
+		selectionArea.SetActive(true);
 		selectionAreaTransform = selectionArea.GetComponentInChildren<RectTransform>();
 		selectionArea.SetActive(false);
 	}

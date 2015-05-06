@@ -80,7 +80,7 @@ GameObject:
   - 114: {fileID: 11473148}
   m_Layer: 10
   m_Name: UnitFactory
-  m_TagString: Untagged
+  m_TagString: Building
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -295,9 +295,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   owner: 0
+  buildingType: 0
   hp: 15
   tPosition: {x: 0, y: 0, z: 0}
   tForward: {x: 0, y: 0, z: 0}
+  cachedTransform: {fileID: 0}
 --- !u!114 &11473148
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -310,9 +312,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   owner: 0
+  buildingType: 0
   hp: 15
   tPosition: {x: 0, y: 0, z: 0}
   tForward: {x: 0, y: 0, z: 0}
+  cachedTransform: {fileID: 0}
 --- !u!135 &13532116
 SphereCollider:
   m_ObjectHideFlags: 1
