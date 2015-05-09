@@ -36,6 +36,14 @@ public class BuildingsManager : MonoBehaviour {
 	private float recalculateTimer;
 	private bool recalculate;
 
+	public void Sell() {
+		UserControls.instance.building.Sell();
+	}
+
+	public void Repair() {
+		UserControls.instance.building.Repair();
+	}
+
 	public void Recalculate() {
 		recalculateTimer = recalculateTime;
 		recalculate = true;
