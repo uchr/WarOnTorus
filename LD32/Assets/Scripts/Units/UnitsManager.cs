@@ -32,26 +32,22 @@ public class UnitsManager : MonoBehaviour {
 
 	public float updatePathRadius = 0.2f;
 
-	public Troop GetTroopFromSelectionArea(Vector3 from, Vector3 to) {
+	public List<Unit> GetUnitsFromSelectionArea(Vector3 from, Vector3 to, int number) {
 		var min = new Vector2(Mathf.Min(from.x, to.x), Mathf.Min(from.y, to.y));
 		var max = new Vector2(Mathf.Max(from.x, to.x), Mathf.Max(from.y, to.y));
 		var rect = new Rect(min.x, min.y, max.x - min.x, max.y - min.y);
 
-		var units = GameObject.FindGameObjectsWithTag("Unit");
+		var unitObjects = GameObject.FindGameObjectsWithTag("Unit");
 		List<Unit> result = new List<Unit>();
-		foreach (var unit in units) {
-			var p = Camera.main.WorldToScreenPoint(unit.transform.position);
-			var u = unit.GetComponent<Unit>();
-			if (u != null && u.owner == 0 && result.Count <= 6 && rect.Contains(new Vector2(p.x, p.y)) && !Physics.Raycast(unit.transform.position, Camera.main.transform.position - unit.transform.position, 50.0f, 1 << 8))
-				result.Add(u);
+		foreach (var unitObject in unitObjects) {
+			if (result.Count == number) break;
+
+			var p = Camera.main.WorldToScreenPoint(unitObject.transform.position);
+			var unit = unitObject.GetComponent<Unit>();
+			if (unit != null && unit.owner == 0 && rect.Contains(new Vector2(p.x, p.y)) && !Physics.Raycast(unitObject.transform.position, Camera.main.transform.position - unitObject.transform.position, 50.0f, 1 << 8))
+				result.Add(unit);
 		}
 
-		if (result.Count > 0) {
-			Troop troop = new Troop();
-			troop.units = result.ToArray();
-			troop.Select();
-			return troop;
-		}
-		return null;
+		return result;
 	}
 }

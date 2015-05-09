@@ -2,50 +2,39 @@
 using System.Collections;
 
 public class VerticalTank : Unit {
-	private enum State {
-		Idle,
-		AttackUnit,
-		AttackBuilding
-	};
-
-	public GameObject bullet;
-
-	public float time = 1.0f;
-	public float timer = 1.0f;
-
 	public float fireWidth;
 	public float fireHeight;
+	
+	public GameObject bullet;
 
-	private State state = State.Idle;
-	private Unit goalUnit;
-	private Building goalBuilding;
-
-	public override void Move(Vector3 goal) {
-		state = State.Idle;
+	public override void GoTo(Vector3 goal) {
+		state = UnitState.Idle;
 		Map.instance.SetPath(goal, this);
 	}
 
 	public override void AttackUnit(Unit unit, Vector3 attackPosition) {
-		state = State.AttackUnit;
+		state = UnitState.AttackUnit;
 		goalUnit = unit;
 	}
 
 	public override void AttackBuilding(Building building, Vector3 relativeAttackPosition) {
-		state = State.AttackBuilding;
+		state = UnitState.AttackBuilding;
 		goalBuilding = building;
 	}
 
-	private void Update() {
-		if (hp <= 0)
-			Destroy(gameObject);
-		bool needGo = false;
+	protected override void Update() {
+		base.Update();
+
 		if (timer >= 0.0f)
 			timer -= Time.deltaTime;
-		if (state == State.AttackUnit) {
+
+		if (state == UnitState.AttackUnit) {
 			if (goalUnit == null) {
-				state = State.Idle;
+				state = UnitState.Idle;
+				path = null;
 				return;
 			}
+
 			var hits = Physics.CapsuleCastAll(cachedTransform.position, cachedTransform.position + cachedTransform.up * fireHeight, fireWidth, cachedTransform.up, 1 << 11);
 			foreach (var hit in hits) {
 				if (hit.transform.GetComponent<Unit>() == goalUnit && timer <= 0.0f) {
@@ -58,11 +47,14 @@ public class VerticalTank : Unit {
 				}
 			}
 		}
-		if (state == State.AttackBuilding) {
+
+		if (state == UnitState.AttackBuilding) {
 			if (goalBuilding == null) {
-				state = State.Idle;
+				state = UnitState.Idle;
+				path = null;
 				return;
 			}
+
 			var hits = Physics.CapsuleCastAll(cachedTransform.position, cachedTransform.position + cachedTransform.up * fireHeight, fireWidth, cachedTransform.up, 1 << 10);
 			foreach (var hit in hits) {
 				if (hit.transform.GetComponent<Building>() == goalBuilding && timer <= 0.0f) {
@@ -75,35 +67,9 @@ public class VerticalTank : Unit {
 				}
 			}
 		}
-		if (state == State.Idle) {
-			needGo = true;
-		}
 
-		if (needGo && path != null && i < path.Length) {
-			Vector3 dir = Vector3.zero;
-
-			if (tPosition.x <= Mathf.PI)
-				dir.x = Mathf.Abs(path[i].x - 2 * Mathf.PI - tPosition.x) < Mathf.Abs(path[i].x - tPosition.x) ? path[i].x - 2 * Mathf.PI : path[i].x;
-			else
-				dir.x = Mathf.Abs(path[i].x + 2 * Mathf.PI - tPosition.x) < Mathf.Abs(path[i].x - tPosition.x) ? path[i].x + 2 * Mathf.PI : path[i].x;
-
-			if (tPosition.y <= Mathf.PI)
-				dir.y = Mathf.Abs(path[i].y - 2 * Mathf.PI - tPosition.y) < Mathf.Abs(path[i].y - tPosition.y) ? path[i].y - 2 * Mathf.PI : path[i].y;
-			else
-				dir.y = Mathf.Abs(path[i].y + 2 * Mathf.PI - tPosition.y) < Mathf.Abs(path[i].y - tPosition.y) ? path[i].y + 2 * Mathf.PI : path[i].y;
-
-			tPosition += (dir - tPosition).normalized * speed * Time.deltaTime;
-
-			dir.x -= tPosition.x;
-			dir.y -= tPosition.y;
-			tPosition.x %= 2 * Mathf.PI;
-			tPosition.y %= 2 * Mathf.PI;
-
-			// TODO FIX IT
-			UpdatePosition(torus.TorusToCartesian(path[i] + Vector3.forward * height));
-
-			if ((Mathf.Sqrt(dir.x * dir.x + dir.y * dir.y)) < 0.08f) ++i;
-			if (i == path.Length) path = null;
+		if (state == UnitState.Idle) {
+			Move();
 		}
 	}
 }

@@ -27,6 +27,10 @@ public class AICycle {
 	[System.NonSerialized]
 	public float timer = 0.0f;
 
+	public AICycle() {
+		troop = new Troop();
+	}
+
 	public void CreateFactory() {
 		factory = (UnitFactory) BuildingsManager.instance.CreateBuilding(0);
 		var colliders = factory.GetComponentsInChildren<SphereCollider>();

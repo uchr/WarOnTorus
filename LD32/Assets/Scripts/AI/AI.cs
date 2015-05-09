@@ -37,7 +37,7 @@ public class AI : MonoBehaviour {
 				break;
 			case AIAction.CreateTroop:
 				if (cycle.factory.queue.Count == 0) {
-					cycle.troop = cycle.factory.GetTroop();
+					cycle.troop.ChangeTo(cycle.factory.GetUnits(cycle.tanksNumber));
 					cycle.action = AIAction.MoveTroop;
 					cycle.MoveTroop();
 					cycle.timer = cycle.waitTime;
@@ -56,7 +56,7 @@ public class AI : MonoBehaviour {
 				break;
 			case AIAction.AttackTroop:
 				cycle.CheckGoal();
-				if (cycle.troop.GetCount() == 0) {
+				if (cycle.troop.count == 0) {
 					if (cycle.factory == null) {
 						cycle.action = AIAction.CreateFactory;
 						cycle.CreateFactory();

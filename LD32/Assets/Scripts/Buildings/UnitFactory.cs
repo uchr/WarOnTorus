@@ -21,13 +21,11 @@ public class UnitFactory : Building {
 
 	private Queue<Unit> units;
 
-	public Troop GetTroop() {
+	public List<Unit> GetUnits(int number) {
 		List<Unit> result = new List<Unit>();
-		for (int i = 0; i < 6 && units.Count > 0; ++i)
+		for (int i = 0; i < number && units.Count > 0; ++i)
 			result.Add(units.Dequeue());
-		Troop troop = new Troop();
-		troop.units = result.ToArray();
-		return troop;
+		return result;
 	}
 
 	public bool Production(int id) {

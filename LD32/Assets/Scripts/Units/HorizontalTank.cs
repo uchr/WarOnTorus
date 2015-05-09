@@ -1,35 +1,20 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class HorizontalTank : Unit {
-	private enum State {
-		Idle,
-		AttackUnit,
-		AttackBuilding
-	};
-
 	public float fireLength;
 
 	public GameObject bullet;
 
-	public float time = 1.0f;
-	public float timer = 1.0f;
-
-	private State state = State.Idle;
-
-	private Vector3 tCurrent;
-	private Unit goalUnit;
-	private Building goalBuilding;
-
-	public override void Move(Vector3 goal) {
-		state = State.Idle;
+	public override void GoTo(Vector3 goal) {
+		state = UnitState.Idle;
 		Map.instance.SetPath(goal, this);
 		isReached = false;
 	}
 
 	public override void AttackUnit(Unit unit, Vector3 relativeAttackPosition) {
 		this.relativeAttackPosition = relativeAttackPosition;
-		state = State.AttackUnit;
+		state = UnitState.AttackUnit;
 		goalUnit = unit;
 		tCurrent = Torus.instance.Repeat(goalUnit.tPosition + relativeAttackPosition);
 		Map.instance.SetPath(tCurrent, this);
@@ -37,23 +22,20 @@ public class HorizontalTank : Unit {
 
 	public override void AttackBuilding(Building building, Vector3 relativeAttackPosition) {
 		this.relativeAttackPosition = relativeAttackPosition;
-		state = State.AttackBuilding;
+		state = UnitState.AttackBuilding;
 		goalBuilding = building;
 		Map.instance.SetPath(Torus.instance.Repeat(goalBuilding.tPosition + relativeAttackPosition), this);
 	}
 
 	protected override void Update() {
 		base.Update();
-		if (hp <= 0)
-			Destroy(gameObject);
 
 		if (timer >= 0.0f)
 			timer -= Time.deltaTime;
 
-		bool needGo = false;
-		if (state == State.AttackUnit) {
+		if (state == UnitState.AttackUnit) {
 			if (goalUnit == null) {
-				state = State.Idle;
+				state = UnitState.Idle;
 				path = null;
 				return;
 			}
@@ -70,7 +52,7 @@ public class HorizontalTank : Unit {
 				}
 			}
 			else {
-				needGo = true;
+				Move();
 			}
 
 			var t = Torus.instance.Repeat(goalUnit.tPosition + relativeAttackPosition);
@@ -80,12 +62,13 @@ public class HorizontalTank : Unit {
 			}
 		}
 
-		if (state == State.AttackBuilding) {
+		if (state == UnitState.AttackBuilding) {
 			if (goalBuilding == null) {
-				state = State.Idle;
+				state = UnitState.Idle;
 				path = null;
 				return;
 			}
+
 			if (Torus.instance.Distance(goalBuilding.tPosition, tPosition) <= fireLength) {
 				if (timer <= 0.0f) {
 					UpdatePosition(Torus.instance.TorusToCartesian(goalBuilding.tPosition));
@@ -98,43 +81,12 @@ public class HorizontalTank : Unit {
 				}
 			}
 			else {
-				needGo = true;
+				Move();
 			}
 		}
 
-		if (state == State.Idle) {
-			needGo = true;
-		}
-
-		if (needGo && path != null && i < path.Length) {
-			Vector3 dir = Vector3.zero;
-
-			if (tPosition.x <= Mathf.PI)
-				dir.x = Mathf.Abs(path[i].x - 2 * Mathf.PI - tPosition.x) < Mathf.Abs(path[i].x - tPosition.x) ? path[i].x - 2 * Mathf.PI : path[i].x;
-			else
-				dir.x = Mathf.Abs(path[i].x + 2 * Mathf.PI - tPosition.x) < Mathf.Abs(path[i].x - tPosition.x) ? path[i].x + 2 * Mathf.PI : path[i].x;
-
-			if (tPosition.y <= Mathf.PI)
-				dir.y = Mathf.Abs(path[i].y - 2 * Mathf.PI - tPosition.y) < Mathf.Abs(path[i].y - tPosition.y) ? path[i].y - 2 * Mathf.PI : path[i].y;
-			else
-				dir.y = Mathf.Abs(path[i].y + 2 * Mathf.PI - tPosition.y) < Mathf.Abs(path[i].y - tPosition.y) ? path[i].y + 2 * Mathf.PI : path[i].y;
-
-			var t = (dir - tPosition).normalized;
-			tPosition.x += t.x * phiSpeed * Time.deltaTime;
-			tPosition.y += t.y * tetaSpeed * Time.deltaTime;
-
-			dir.x -= tPosition.x;
-			dir.y -= tPosition.y;
-
-			// TODO FIX IT
-			UpdatePosition(torus.TorusToCartesian(path[i] + new Vector3(0.0f, 0.0f, height)));
-
-			if (Mathf.Sqrt(dir.x * dir.x + dir.y * dir.y) < 0.08f) ++i;
-			if (i == path.Length) {
-				isReached = true;
-				path = null;
-			}
+		if (state == UnitState.Idle) {
+			Move();
 		}
 	}
-
 }

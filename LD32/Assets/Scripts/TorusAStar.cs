@@ -75,7 +75,7 @@ public class TorusAStar {
 			openSet.Remove(currentNode);
 			closedSet.Add(currentNode);
 			// HACK!
-			if (currentNode.pathLengthFromStart > 50) {
+			if (currentNode.pathLengthFromStart > 70) {
 				return;
 			}
 			foreach (var neighbourNode in GetNeighbours(currentNode, goal)) {

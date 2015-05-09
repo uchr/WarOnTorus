@@ -110,7 +110,7 @@ public class Map : MonoBehaviour {
 
 		foreach (var thred in deads) {
 			if (thred.arg.path == null) {
-				Debug.Log("Path not found " + thred.arg.goal.x + " " + thred.arg.goal.y);
+				//Debug.Log("Path not found " + thred.arg.goal.x + " " + thred.arg.goal.y);
 				thred.unit.UpdatePath(null);
 			}
 			else {

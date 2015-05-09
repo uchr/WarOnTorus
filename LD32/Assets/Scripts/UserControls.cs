@@ -88,8 +88,9 @@ public class UserControls : MonoBehaviour {
 			Unselect();
 			isSelectionArea = false;
 			selectionArea.SetActive(false);
-			troop = UnitsManager.instance.GetTroopFromSelectionArea(selectionFrom, selectionTo);
-			if (troop != null) {
+			var units = UnitsManager.instance.GetUnitsFromSelectionArea(selectionFrom, selectionTo, 6);
+			troop.ChangeTo(units);
+			if (units.Count > 0) {
 				mode = Mode.SelectedTroop;
 				return EventSelection.Selected;
 			}
@@ -109,10 +110,9 @@ public class UserControls : MonoBehaviour {
 				if (Physics.Raycast(ray, out hit, 50.0f, 1 << 11)) { // Unit layer
 					var unit = hit.transform.GetComponent<Unit>();
 					if (unit.owner == 0) {
-						troop = new Troop();
-						troop.units = new Unit[1];
-						troop.units[0] = unit;
-						troop.Select();
+						var units = new List<Unit>();
+						units.Add(unit);
+						troop.ChangeTo(units);
 						mode = Mode.SelectedTroop;
 						return EventSelection.Selected;
 					}
@@ -129,10 +129,8 @@ public class UserControls : MonoBehaviour {
 			menu.SetActive(false);
 		unitsMenu.SetActive(false);
 
-		if (troop != null)
-			troop.Unselect();
+		troop.ChangeTo(null);
 
-		troop = null;
 		building = null;
 	}
 
@@ -237,7 +235,7 @@ public class UserControls : MonoBehaviour {
 		// TODO MOVE TO TROOP
 		unitsMenu.SetActive(true);
 		string descriptionTroop = "";
-		for (int i = 0; i < troop.GetCount(); ++i) {
+		for (int i = 0; i < troop.count; ++i) {
 			descriptionTroop += (i + 1) + ".";
 			switch (troop.units[i].unitType) {
 				case UnitType.HorizontalTank:
@@ -289,6 +287,7 @@ public class UserControls : MonoBehaviour {
 	}
 
 	private void Awake() {
+		troop = new Troop();
 		selectionArea.SetActive(true);
 		selectionAreaTransform = selectionArea.GetComponentInChildren<RectTransform>();
 		selectionArea.SetActive(false);

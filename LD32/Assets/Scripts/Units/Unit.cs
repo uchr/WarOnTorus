@@ -1,78 +1,131 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+public enum UnitState {
+	Idle,
+	AttackUnit,
+	AttackBuilding
+};
+
 public abstract class Unit : MonoBehaviour {
-	public int owner = 0;
-
+	// Logic
 	public UnitType unitType;
-
+	public int owner = 0;
 	public int hp = 5;
+	public Troop troop;
+	public string name;
 
+	protected UnitState state = UnitState.Idle;
+
+	// Movement
+	public Vector3 tPosition;
+	public float height = 1.0f;
+	
 	public float speed = 1.0f;
 	protected float phiSpeed = 1.0f;
 	protected float tetaSpeed = 1.0f;
-	public float height = 1.0f;
-
-	protected Torus torus;
-	
-	public Vector3 tPosition;
-
-	public GameObject fireArea;
 
 	public bool isReached = false;
 
+	protected int i = 0;
+	public Vector3[] path;
+
+	private int col = 0;
+
+	// Attack
+	public GameObject fireArea;
+	
+	public float time = 1.0f;
+	protected float timer = 1.0f;
+
 	protected Vector3 relativeAttackPosition;
 
-	public Vector3[] path;
-	protected int i = 0;
+	protected Vector3 tCurrent;
+	protected Unit goalUnit;
+	protected Building goalBuilding;
 
 	protected Transform cachedTransform;
 
+	public abstract void GoTo(Vector3 goal);
 	public abstract void AttackUnit(Unit unit, Vector3 relativeAttackPosition);
 	public abstract void AttackBuilding(Building building, Vector3 relativeAttackPosition);
-	public abstract void Move(Vector3 goal);
 
 	public void UpdatePath(Vector3[] path) {
 		i = 1;
 		this.path = path;
 	}
 
-	private int col = 0;
-
 	public void SetOwner(int owner) {
 		this.owner = owner;
 		var renderers = GetComponentsInChildren<Renderer>();
-		foreach (var r in renderers) {
+		foreach (var renderer in renderers) {
 			// TODO DELETE IT
-			if (r.gameObject.layer == 16) continue;
+			if (renderer.gameObject.layer == 16) continue;
 			if (owner == 0)
-				r.material = BalanceSettings.instance.blue;
+				renderer.material = BalanceSettings.instance.blue;
 			else
-				r.material = BalanceSettings.instance.red;
+				renderer.material = BalanceSettings.instance.red;
 		}
 	}
 
 	public void UpdatePosition(Vector3 lookAt) {
 		tPosition = Torus.instance.Repeat(tPosition);
-		cachedTransform.position = torus.TorusToCartesian(tPosition);
+		cachedTransform.position = Torus.instance.TorusToCartesian(tPosition);
 		if (Vector3.Distance(cachedTransform.position, lookAt) > 0.2f)
-			cachedTransform.LookAt(lookAt, torus.GetNormal2(tPosition));
+			cachedTransform.LookAt(lookAt, Torus.instance.GetNormal2(tPosition));
 	}
 
 	private void Awake() {
-		torus = Torus.instance;
 		cachedTransform = GetComponent<Transform>();
 
 		tPosition = new Vector3(0.0f, 0.0f, height);
 
-		var deltaPhi = Vector3.Distance(torus.TorusToCartesian(Vector3.zero), torus.TorusToCartesian(new Vector3(speed, 0.0f, 0.0f)));
-		var deltaTeta = Vector3.Distance(torus.TorusToCartesian(Vector3.zero), torus.TorusToCartesian(new Vector3(0.0f, speed, 0.0f)));
+		var deltaPhi = Vector3.Distance(Torus.instance.TorusToCartesian(Vector3.zero), Torus.instance.TorusToCartesian(new Vector3(speed, 0.0f, 0.0f)));
+		var deltaTeta = Vector3.Distance(Torus.instance.TorusToCartesian(Vector3.zero), Torus.instance.TorusToCartesian(new Vector3(0.0f, speed, 0.0f)));
 		phiSpeed = speed;
 		tetaSpeed = speed * (deltaPhi / deltaTeta);
 	}
 
+	protected void Move() {
+		if (path != null && i < path.Length) {
+			Vector3 dir = Vector3.zero;
+
+			if (tPosition.x <= Mathf.PI)
+				dir.x = Mathf.Abs(path[i].x - 2 * Mathf.PI - tPosition.x) < Mathf.Abs(path[i].x - tPosition.x) ? path[i].x - 2 * Mathf.PI : path[i].x;
+			else
+				dir.x = Mathf.Abs(path[i].x + 2 * Mathf.PI - tPosition.x) < Mathf.Abs(path[i].x - tPosition.x) ? path[i].x + 2 * Mathf.PI : path[i].x;
+
+			if (tPosition.y <= Mathf.PI)
+				dir.y = Mathf.Abs(path[i].y - 2 * Mathf.PI - tPosition.y) < Mathf.Abs(path[i].y - tPosition.y) ? path[i].y - 2 * Mathf.PI : path[i].y;
+			else
+				dir.y = Mathf.Abs(path[i].y + 2 * Mathf.PI - tPosition.y) < Mathf.Abs(path[i].y - tPosition.y) ? path[i].y + 2 * Mathf.PI : path[i].y;
+
+			var t = (dir - tPosition).normalized;
+			tPosition.x += t.x * phiSpeed * Time.deltaTime;
+			tPosition.y += t.y * tetaSpeed * Time.deltaTime;
+
+			dir.x -= tPosition.x;
+			dir.y -= tPosition.y;
+
+			// TODO FIX IT
+			UpdatePosition(Torus.instance.TorusToCartesian(path[i] + new Vector3(0.0f, 0.0f, height)));
+
+			if (Mathf.Sqrt(dir.x * dir.x + dir.y * dir.y) < 0.08f) ++i;
+			if (i == path.Length) {
+				isReached = true;
+				path = null;
+			}
+		}
+	}
+
 	protected virtual void Update() {
 		col = 0;
+
+		if (hp <= 0) {
+			if (troop != null)
+				troop.UnitKilled(this);
+			Destroy(gameObject);
+		}
 	}
 
 	private void OnTriggerStay(Collider other) {
@@ -95,9 +148,9 @@ public abstract class Unit : MonoBehaviour {
 	private void OnDrawGizmos() {
 		if (path != null && path.Length > 0) {
 			Gizmos.color = Color.green;
-			Vector3 prev = torus.TorusToCartesian(path[0]);
+			Vector3 prev = Torus.instance.TorusToCartesian(path[0]);
 			foreach (var point in path) {
-				var p = torus.TorusToCartesian(point);
+				var p = Torus.instance.TorusToCartesian(point);
 				Gizmos.DrawLine(prev, p);
 				prev = p;
 			}

@@ -5469,7 +5469,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   torus: {fileID: 1357978186}
-  maxDistance: 4
+  maxDistance: 3
   largePartitionFactor: 3
   smallPartitionFactor: 3
   layerMask:
