@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Text;
 
 public enum UnitState {
 	Idle,
@@ -75,8 +76,27 @@ public abstract class Unit : MonoBehaviour {
 			cachedTransform.LookAt(lookAt, Torus.instance.GetNormal2(tPosition));
 	}
 
+	private string RandomString(int size) {
+        StringBuilder builder = new StringBuilder();
+        char c;
+        for (int i = 0; i < size; i++) {
+            c = (char) Random.Range('A', 'Z');                 
+            builder.Append(c);
+        }
+
+        return builder.ToString();
+    }
+
+	protected string GetName() {
+		return Random.Range(0, 10) + RandomString(4); 
+	}
+
 	private void Awake() {
+		name = GetName();
+		gameObject.name = name;
+
 		cachedTransform = GetComponent<Transform>();
+		cachedTransform.SetParent(GameObject.Find("Units").transform);
 
 		tPosition = new Vector3(0.0f, 0.0f, height);
 
