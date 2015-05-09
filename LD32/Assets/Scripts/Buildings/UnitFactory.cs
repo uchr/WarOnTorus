@@ -1,16 +1,17 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 
 public class UnitFactory : Building {
 	public class UnitProduction {
-		public float time;
+		public float timer;
 		public UnitSettings unitSettings;
 		public UnitType unitType;
 
 		public UnitProduction(int id) {
 			unitSettings = UnitsManager.instance.units[id];
-			time = unitSettings.productionTime;
+			timer = unitSettings.productionTime;
 			unitType = (UnitType) id;
 		}
 	}
@@ -36,6 +37,31 @@ public class UnitFactory : Building {
 		return true;
 	}
 
+	public string GetDescription() {
+		StringBuilder builder = new StringBuilder();
+
+		var q = queue.ToArray();
+		for (int i = 0; i < queue.Count; ++i) {
+			builder.Append(i + 1);
+			builder.Append('.');
+			builder.Append(' ');
+			switch (q[i].unitType) {
+				case UnitType.HorizontalTank:
+					builder.Append("HorizontalTank");
+					break;
+				case UnitType.VerticalTank:
+					builder.Append("VerticalTank");
+					break;
+			}
+			builder.Append(' ');
+			builder.Append(100 - (int) (100.0f * q[i].timer / q[i].unitSettings.productionTime));
+			builder.Append('%');
+			builder.Append('\n');
+		}
+		
+        return builder.ToString();
+	}
+
 	private void Awake() {
 		units = new Queue<Unit>();
 		queue = new Queue<UnitProduction>();
@@ -46,8 +72,8 @@ public class UnitFactory : Building {
 		base.Update();
 		if (queue.Count > 0) {
 			var unitProduction = queue.Peek();
-			unitProduction.time -= Time.deltaTime;
-			if (unitProduction.time <= 0.0f) {
+			unitProduction.timer -= Time.deltaTime;
+			if (unitProduction.timer <= 0.0f) {
 				var unit = ((GameObject) Instantiate(unitProduction.unitSettings.prefab, Vector3.zero, Quaternion.identity)).GetComponent<Unit>();
 				// TODO FIX IT
 				unit.unitType = unitProduction.unitType;

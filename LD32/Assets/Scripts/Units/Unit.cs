@@ -12,7 +12,7 @@ public abstract class Unit : MonoBehaviour {
 	// Logic
 	public UnitType unitType;
 	public int owner = 0;
-	public int maxhp = 5;
+	public int maxHP = 5;
 	public int hp = 5;
 	public Troop troop;
 	public string name;
@@ -79,7 +79,6 @@ public abstract class Unit : MonoBehaviour {
 
 	private string RandomString(int size) {
 		StringBuilder builder = new StringBuilder();
-		char c;
 		for (int i = 0; i < size; i++) {       
 			builder.Append((char) Random.Range('A', 'Z'));
 		}

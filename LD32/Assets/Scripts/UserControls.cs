@@ -5,6 +5,16 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class UserControls : MonoBehaviour {
+	private static UserControls _instance;
+ 
+	public static UserControls instance {
+		get	{
+			if(_instance == null)
+				_instance = GameObject.FindObjectOfType<UserControls>();
+			return _instance;
+		}
+	}
+
 	public enum Mode {
 		Default,
 		SelectedBuilding,
@@ -25,12 +35,6 @@ public class UserControls : MonoBehaviour {
 
 	public Text checkMode;
 
-	// Menu
-	public GameObject[] buildingMenus;
-	public GameObject unitsMenu;
-	public Text[] buildingMenuTexts;
-	public Text unitsMenuText;
-
 	public Mode mode = Mode.Default;
 
 	// Mode.RotateBuilding && Mode.CreateBuilding
@@ -38,10 +42,12 @@ public class UserControls : MonoBehaviour {
 	private Building createdBuilding;
 
 	// Mode.SelectedTroop
-	private Troop troop;
+	[System.NonSerialized]
+	public Troop troop;
 
 	// Mode.SelectedBuilding
-	private Building building;
+	[System.NonSerialized]
+	public Building building;
 
 	// SelectionArea
 	public GameObject selectionArea;
@@ -92,6 +98,7 @@ public class UserControls : MonoBehaviour {
 			troop.ChangeTo(units);
 			if (units.Count > 0) {
 				mode = Mode.SelectedTroop;
+				MenuManager.instance.UpdateMenu();
 				return EventSelection.Selected;
 			}
 		}
@@ -103,8 +110,11 @@ public class UserControls : MonoBehaviour {
 				Unselect();
 				if (Physics.Raycast(ray, out hit, 100.0f, 1 << 10)) { // Building layer
 					building = hit.transform.GetComponent<Building>();
-					mode = Mode.SelectedBuilding;
-					return EventSelection.Selected;
+					if (building.owner == 0) {
+						mode = Mode.SelectedBuilding;
+						MenuManager.instance.UpdateMenu();
+						return EventSelection.Selected;
+					}
 				}
 
 				if (Physics.Raycast(ray, out hit, 50.0f, 1 << 11)) { // Unit layer
@@ -114,6 +124,7 @@ public class UserControls : MonoBehaviour {
 						units.Add(unit);
 						troop.ChangeTo(units);
 						mode = Mode.SelectedTroop;
+						MenuManager.instance.UpdateMenu();
 						return EventSelection.Selected;
 					}
 				}
@@ -125,9 +136,8 @@ public class UserControls : MonoBehaviour {
 
 	private void Unselect() {
 		mode = Mode.Default;
-		foreach (var menu in buildingMenus)
-			menu.SetActive(false);
-		unitsMenu.SetActive(false);
+
+		MenuManager.instance.UpdateMenu();
 
 		troop.ChangeTo(null);
 
@@ -232,23 +242,6 @@ public class UserControls : MonoBehaviour {
 			}
 		}
 
-		// TODO MOVE TO TROOP
-		unitsMenu.SetActive(true);
-		string descriptionTroop = "";
-		for (int i = 0; i < troop.count; ++i) {
-			descriptionTroop += (i + 1) + ".";
-			switch (troop.units[i].unitType) {
-				case UnitType.HorizontalTank:
-					descriptionTroop += " HorizontalTank";
-					break;
-				case UnitType.VerticalTank:
-					descriptionTroop += " VerticalTank";
-					break;
-			}
-			descriptionTroop += "\n";
-		}
-		unitsMenuText.text = descriptionTroop;
-
 		EventSelection eventSelection = Select();
 		if (eventSelection == EventSelection.Selected) return;
 		if (eventSelection == EventSelection.Unselected) {
@@ -264,13 +257,6 @@ public class UserControls : MonoBehaviour {
 		}
 
 		UpdatePointer();
-
-		// TODO FIX IT
-		// TODO ADD UPDATE
-		if (building != null) {
-			int numberBuildingType = (int) building.buildingType;
-			buildingMenus[numberBuildingType].SetActive(true);
-		}
 
 		EventSelection eventSelection = Select();
 		if (eventSelection == EventSelection.Selected) return;

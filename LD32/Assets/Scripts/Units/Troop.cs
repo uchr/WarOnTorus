@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 
 [System.Serializable]
 public class Troop {
@@ -84,5 +85,23 @@ public class Troop {
 			t = Torus.instance.Repeat(t);
 			units[i].GoTo(t);
 		}
+	}
+
+	public string GetDescription() {
+		StringBuilder builder = new StringBuilder();
+
+		for (int i = 0; i < units.Count; ++i) {
+			builder.Append(i + 1);
+			builder.Append('.');
+			builder.Append(' ');
+			builder.Append(units[i].name);
+			builder.Append(' ');
+			builder.Append(units[i].hp);
+			builder.Append('/');
+			builder.Append(units[i].maxHP);
+			builder.Append('\n');
+		}
+		
+        return builder.ToString();
 	}
 }

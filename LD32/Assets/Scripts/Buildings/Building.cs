@@ -6,6 +6,7 @@ public class Building : MonoBehaviour {
 
 	public BuildingType buildingType;
 
+	public int maxHP = 15;
 	public int hp = 15;
 	
 	public Vector3 tPosition;
@@ -59,5 +60,14 @@ public class Building : MonoBehaviour {
 			Destroy(gameObject);
 			BuildingsManager.instance.Recalculate();
 		}
+	}
+
+	public void Sell() {
+		Destroy(gameObject);
+		BuildingsManager.instance.Recalculate();
+	}
+
+	public void Repair() {
+		hp = maxHP;
 	}
 }
