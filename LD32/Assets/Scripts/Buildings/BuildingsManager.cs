@@ -3,7 +3,7 @@ using System.Collections;
 
 public enum BuildingType {
 	UnitFactory,
-	MineralsProcessing,
+	MineralFactory,
 	ScinceCenter,
 	Shild
 }
@@ -51,6 +51,7 @@ public class BuildingsManager : MonoBehaviour {
 
 	public Building CreateBuilding(int id) {
 		var building = ((GameObject) Instantiate(buildings[id].prefab, Vector3.zero, Quaternion.identity)).GetComponent<Building>();
+		building.GetComponent<Building>().buildingType = (BuildingType) id;
 		return building;
 	}
 

@@ -45,12 +45,7 @@ public class Building : MonoBehaviour {
 		}
 	}
 
-	public bool PossibleToBuild() {
-		// TODO ADD IT
-		return true;
-	}
-
-	private void Awake() {
+	protected virtual void Awake() {
 		cachedTransform = GetComponent<Transform>();
 	}
 

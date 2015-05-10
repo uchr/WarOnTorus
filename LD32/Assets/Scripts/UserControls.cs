@@ -40,6 +40,7 @@ public class UserControls : MonoBehaviour {
 	// Mode.RotateBuilding && Mode.CreateBuilding
 	public Transform tangentSpace;
 	private Building createdBuilding;
+	public GameObject mineralObject;
 
 	// Mode.SelectedTroop
 	[System.NonSerialized]
@@ -63,8 +64,10 @@ public class UserControls : MonoBehaviour {
 	}
 
 	public void CreateUnit(int id) {
-		if (building.buildingType == BuildingType.UnitFactory)
+		if (building.buildingType == BuildingType.UnitFactory && Player.instance.unitsNumber < BalanceSettings.instance.maxUnits) {
+			++Player.instance.unitsNumber;
 			((UnitFactory) building).Production(id);
+		}
 	}
 
 	public void SetMode(int mode) {
@@ -173,6 +176,10 @@ public class UserControls : MonoBehaviour {
 				c.enabled = true;
 			createdBuilding.Init(0);
 
+			if (createdBuilding.buildingType == BuildingType.MineralFactory) {
+				((MineralFactory) createdBuilding).mineral = mineralObject.GetComponent<Mineral>();
+			}
+
 			createdBuilding = null;
 			Map.instance.CalculateGrid();
 			mode = Mode.Default;
@@ -189,7 +196,23 @@ public class UserControls : MonoBehaviour {
 
 			RaycastHit hit;
 			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-			if (Physics.Raycast(ray, out hit, 50.0f, 1 << 8) && createdBuilding.PossibleToBuild() && !Physics.Raycast(ray, 50.0f, 1 << 15)) { // Torus layer BuldingIntersection layer
+			bool possibleToBuild = Physics.Raycast(ray, out hit, 50.0f, 1 << LayerMask.NameToLayer("Torus"));
+			possibleToBuild &= !Physics.Raycast(ray, 50.0f, 1 << LayerMask.NameToLayer("BuldingIntersection"));
+			if (createdBuilding.buildingType == BuildingType.MineralFactory) {
+				RaycastHit hitMineral;
+				if (Physics.Raycast(ray, out hitMineral, 50.0f, 1 << LayerMask.NameToLayer("Minerals"))) {
+					var dir = (Camera.main.transform.position - hitMineral.point).normalized;
+					var distance = Vector3.Distance(Camera.main.transform.position, hitMineral.point);
+					mineralObject = hitMineral.transform.gameObject;
+					if (Physics.Raycast(hitMineral.point + Torus.instance.GetNormalFromCartesian(hitMineral.point), dir, distance, 1 << LayerMask.NameToLayer("Torus")))
+						possibleToBuild = false;
+				}
+				else {
+					possibleToBuild = false;
+				}
+			}
+
+			if (possibleToBuild) {
 				createdBuilding.cachedTransform.position = hit.point;
 				createdBuilding.cachedTransform.up = torus.GetNormalFromCartesian(hit.point);
 

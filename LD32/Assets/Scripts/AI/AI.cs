@@ -23,6 +23,8 @@ public class AI : MonoBehaviour {
 		}
 	}
 
+	public int resourceNumber = 2000;
+
 	public AICycle[] cycles;
 
 	private void ChangeState(AICycle cycle) {

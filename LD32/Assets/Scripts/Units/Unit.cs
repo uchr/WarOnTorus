@@ -141,6 +141,9 @@ public abstract class Unit : MonoBehaviour {
 		col = 0;
 
 		if (hp <= 0) {
+			if (owner == 0)
+				--Player.instance.unitsNumber;
+
 			if (troop != null)
 				troop.UnitKilled(this);
 			Destroy(gameObject);
@@ -148,7 +151,7 @@ public abstract class Unit : MonoBehaviour {
 	}
 
 	private void OnTriggerStay(Collider other) {
-		if (col > 6) return;
+		if (col > 3) return;
 		++col;
 
 		var unit = other.GetComponent<Unit>();

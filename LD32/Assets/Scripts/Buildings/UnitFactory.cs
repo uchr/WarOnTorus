@@ -59,10 +59,11 @@ public class UnitFactory : Building {
 			builder.Append('\n');
 		}
 		
-        return builder.ToString();
+		return builder.ToString();
 	}
 
-	private void Awake() {
+	protected override void Awake() {
+		base.Awake();
 		units = new Queue<Unit>();
 		queue = new Queue<UnitProduction>();
 		cachedTransform = GetComponent<Transform>();

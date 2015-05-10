@@ -14,6 +14,7 @@ public class MenuManager : MonoBehaviour {
 	
 	public GameObject troopMenu;
 	public GameObject unitFactoryMenu;
+	public GameObject mineralFactoryMenu;
 
 	public void UpdateMenu() {
 		Unselet();
@@ -24,9 +25,11 @@ public class MenuManager : MonoBehaviour {
 				troopMenu.SetActive(true);
 				break;
 			case UserControls.Mode.SelectedBuilding:
-				var building = UserControls.instance.building;
-				if (building.GetComponent<UnitFactory>() != null)
+				var buildingType = UserControls.instance.building.buildingType;
+				if (buildingType == BuildingType.UnitFactory)
 					unitFactoryMenu.SetActive(true);
+				if (buildingType == BuildingType.MineralFactory)
+					mineralFactoryMenu.SetActive(true);
 				break;
 		}
 	}
@@ -34,5 +37,6 @@ public class MenuManager : MonoBehaviour {
 	private void Unselet() {
 		troopMenu.SetActive(false);
 		unitFactoryMenu.SetActive(false);
+		mineralFactoryMenu.SetActive(false);
 	}
 }

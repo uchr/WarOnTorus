@@ -23,9 +23,7 @@ public class BalanceSettings : MonoBehaviour {
     public int mineralsInTime = 10;
     public float periodProductionMinerals = 10;
 
-    public int maxUnits = 20;
-
-    public GameObject minerals;
+    public int maxUnits = 12;
 
     public Material red;
     public Material blue;
