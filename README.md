@@ -3,7 +3,7 @@ Strategy on the torus made in 72 hours for Ludum Dare 32. Has primitive AI, path
 
 Someday I will do:
 - Height map for the terrain generation.
-- Navmesh for pathfinding (cells are very different sizes).
+- Navmesh for pathfinding (cells have different sizes).
 - ...
 
 [Ludum Dare Page](http://ludumdare.com/compo/ludum-dare-32/?action=preview&uid=23609)
